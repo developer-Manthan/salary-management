@@ -79,12 +79,12 @@
         </mat-expansion-panel-header>
 
         <div class="panel-content">
-          <app-loading-spinner *ngIf="!run.lines"></app-loading-spinner>
+          <app-loading-spinner *ngIf="!run.paySlips"></app-loading-spinner>
 
-          <div class="run-summary" *ngIf="run.lines && run.lines.length > 0">
+          <div class="run-summary" *ngIf="run.paySlips && run.paySlips.length > 0">
             <div class="summary-stat">
               <span class="stat-label">Employees</span>
-              <span class="stat-value">{{ run.lines.length }}</span>
+              <span class="stat-value">{{ run.paySlips.length }}</span>
             </div>
             <div class="summary-stat">
                <span class="stat-label">Total Payout</span>
@@ -92,7 +92,7 @@
             </div>
           </div>
 
-          <table mat-table [dataSource]="run.lines || []" *ngIf="run.lines" class="mat-elevation-z0 lines-table">
+          <table mat-table [dataSource]="run.paySlips || []" *ngIf="run.paySlips" class="mat-elevation-z0 lines-table">
             
             <ng-container matColumnDef="employeeCode">
               <th mat-header-cell *matHeaderCellDef> Code </th>

@@ -8,14 +8,14 @@ export class PayrollService {
   private http = inject(HttpClient);
   
   runPayroll(month: string): Observable<PayrollRun> {
-    return this.http.post<PayrollRun>(`/api/v1/payroll-runs/${month}`, {});
+    return this.http.post<PayrollRun>(`/api/v1/payroll-cycle/${month}`, {});
   }
 
   getPayrollRun(month: string): Observable<PayrollRun> {
-    return this.http.get<PayrollRun>(`/api/v1/payroll-runs/${month}`);
+    return this.http.get<PayrollRun>(`/api/v1/payroll-cycle/${month}`);
   }
   
   getPayrollRuns(): Observable<PayrollRun[]> {
-    return this.http.get<PayrollRun[]>('/api/v1/payroll-runs');
+    return this.http.get<PayrollRun[]>('/api/v1/payroll-cycles');
   }
 }

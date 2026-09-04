@@ -4,7 +4,7 @@ export interface PayrollRun {
   triggeredBy: 'MANUAL' | 'SCHEDULED';
   runAt: string;
   status: 'PROCESSING' | 'COMPLETED' | 'FAILED';
-  lines?: PayrollRunLine[];
+  paySlips?: PayrollRunLine[];
 }
 
 export interface PayrollRunLine {
@@ -13,5 +13,5 @@ export interface PayrollRunLine {
   employeeCode: string;
   employeeName: string;
   baseSalary: number;
-  finalAmount: number;
+    finalAmount: number;
 }

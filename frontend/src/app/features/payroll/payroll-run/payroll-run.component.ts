@@ -152,10 +152,10 @@ export class PayrollRunComponent implements OnInit {
   }
 
   loadPayrollRunDetails(month: string, run: PayrollRun): void {
-    if (!run.lines || run.lines.length === 0) {
+    if (!run.paySlips || run.paySlips.length === 0) {
       this.payrollService.getPayrollRun(month).subscribe({
         next: (data) => {
-          run.lines = data.lines;
+          run.paySlips = data.paySlips;
         },
         error: (err) => {
           this.notificationService.error('Failed to load payroll details');
@@ -166,8 +166,8 @@ export class PayrollRunComponent implements OnInit {
   }
 
   getTotalPayout(run: PayrollRun): number {
-    if (!run.lines) return 0;
-    return run.lines.reduce((sum, line) => sum + line.finalAmount, 0);
+    if (!run.paySlips) return 0;
+    return run.paySlips.reduce((sum, line) => sum + line.finalAmount, 0);
   }
 
   formatMonth(monthString: string): string {
