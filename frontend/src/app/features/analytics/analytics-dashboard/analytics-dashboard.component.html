@@ -1,0 +1,78 @@
+<div class="page-content fade-in">
+  
+  <app-page-header 
+    title="Compensation Analytics" 
+    subtitle="Real-time insights into your organization's compensation data">
+  </app-page-header>
+
+  <div class="dashboard-grid">
+    
+    <!-- Row 1: Summary Explorer -->
+    <div class="dashboard-row full-width">
+      <mat-card class="explorer-card">
+        <div class="explorer-header">
+          <mat-icon color="primary">explore</mat-icon>
+          <h3>Summary Explorer</h3>
+        </div>
+        
+        <div class="explorer-controls">
+          <mat-form-field appearance="outline">
+            <mat-label>Dimension</mat-label>
+            <mat-select [(ngModel)]="selectedDimension">
+              <mat-option *ngFor="let dim of dimensions" [value]="dim.value">
+                {{dim.viewValue}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Metric</mat-label>
+            <mat-select [(ngModel)]="selectedMetric">
+              <mat-option *ngFor="let metric of metrics" [value]="metric.value">
+                {{metric.viewValue}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-flat-button color="primary" class="run-btn" (click)="runSummaryQuery()" [disabled]="isSummaryLoading">
+            <mat-icon>play_arrow</mat-icon>
+            Run Query
+          </button>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="explorer-chart-area">
+          <app-loading-spinner *ngIf="isSummaryLoading"></app-loading-spinner>
+          
+          <div *ngIf="summaryError" class="error-state">
+            {{ summaryError }}
+          </div>
+          
+          <app-summary-chart 
+            *ngIf="!isSummaryLoading && !summaryError"
+            [data]="summaryData"
+            [dimension]="selectedDimension"
+            [metric]="selectedMetric">
+          </app-summary-chart>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Row 2: Avg vs Median & Brackets -->
+    <div class="dashboard-row split-row">
+      <div class="col-left">
+        <app-avg-vs-median></app-avg-vs-median>
+      </div>
+      <div class="col-right">
+        <app-brackets></app-brackets>
+      </div>
+    </div>
+
+    <!-- Row 3: Top Earners -->
+    <div class="dashboard-row full-width">
+      <app-top-earners></app-top-earners>
+    </div>
+
+  </div>
+</div>

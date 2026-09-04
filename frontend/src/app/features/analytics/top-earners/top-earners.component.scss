@@ -1,0 +1,91 @@
+.top-earners-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #1a1a2e;
+      }
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .limit-selector {
+        width: 100px;
+        margin-bottom: -22px; /* adjust for mat-form-field padding */
+      }
+    }
+  }
+
+  .table-container {
+    position: relative;
+    min-height: 200px;
+    
+    table {
+      width: 100%;
+      
+      th.mat-header-cell {
+        font-weight: 600;
+        color: #666;
+        font-size: 14px;
+      }
+      
+      .element-row {
+        transition: background-color 0.2s ease;
+        &:hover {
+          background-color: #f8f9fa;
+        }
+      }
+      
+      .rank-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background-color: #e3f2fd;
+        color: #1976d2;
+        font-weight: 600;
+        font-size: 13px;
+      }
+      
+      .salary-cell {
+        font-weight: 700;
+        color: #2e7d32;
+      }
+    }
+
+    .error-state, .empty-state {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .error-state {
+      color: #d32f2f;
+    }
+  }
+}

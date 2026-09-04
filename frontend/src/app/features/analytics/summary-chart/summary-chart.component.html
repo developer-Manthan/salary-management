@@ -1,0 +1,21 @@
+<div class="chart-container fade-in">
+  <div *ngIf="chartData.length === 0" class="empty-state">
+    <p>No data available for the selected criteria.</p>
+  </div>
+  
+  <div class="chart-wrapper" *ngIf="chartData.length > 0">
+    <ngx-charts-bar-vertical
+      [results]="chartData"
+      [scheme]="colorScheme"
+      [gradient]="gradient"
+      [xAxis]="showXAxis"
+      [yAxis]="showYAxis"
+      [legend]="showLegend"
+      [showXAxisLabel]="showXAxisLabel"
+      [showYAxisLabel]="showYAxisLabel"
+      [xAxisLabel]="xAxisLabel"
+      [yAxisLabel]="yAxisLabel"
+      [barPadding]="20">
+    </ngx-charts-bar-vertical>
+  </div>
+</div>

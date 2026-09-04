@@ -1,0 +1,30 @@
+<div class="brackets-container fade-in">
+  <div class="header">
+    <mat-icon color="primary">pie_chart</mat-icon>
+    <h3>Compensation Brackets</h3>
+  </div>
+  
+  <div class="chart-wrapper">
+    <app-loading-spinner *ngIf="isLoading"></app-loading-spinner>
+    
+    <div *ngIf="error" class="error-state">
+      {{ error }}
+    </div>
+
+    <div *ngIf="chartData.length === 0 && !isLoading && !error" class="empty-state">
+      No data available.
+    </div>
+
+    <div class="chart-inner" *ngIf="chartData.length > 0 && !isLoading">
+      <ngx-charts-pie-chart
+        [results]="chartData"
+        [scheme]="colorScheme"
+        [gradient]="gradient"
+        [legend]="showLegend"
+        [legendPosition]="legendPosition"
+        [labels]="showLabels"
+        [doughnut]="isDoughnut">
+      </ngx-charts-pie-chart>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,136 @@
+.avg-median-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+  position: relative;
+
+  mat-card-header {
+    margin-bottom: 24px;
+    
+    mat-icon {
+      background: #e3f2fd;
+      color: #1976d2;
+      border-radius: 8px;
+      padding: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    mat-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+  }
+
+  mat-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .metrics-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 32px;
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .label {
+        font-size: 14px;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+
+      .value {
+        font-size: 28px;
+        font-weight: 700;
+      }
+    }
+
+    .average-metric .value {
+      color: #1976d2; /* Blue */
+    }
+
+    .median-metric .value {
+      color: #00796b; /* Teal */
+    }
+
+    .divider {
+      width: 1px;
+      height: 40px;
+      background-color: #e0e0e0;
+    }
+  }
+
+  .skew-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    
+    .difference {
+      font-size: 16px;
+      
+      .diff-label {
+        color: #666;
+        margin-right: 8px;
+      }
+      
+      .diff-value {
+        font-weight: 600;
+        color: #333;
+      }
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    &.right .badge {
+      background-color: #fff3e0;
+      color: #e65100;
+    }
+
+    &.left .badge {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    &.symmetric .badge {
+      background-color: #f5f5f5;
+      color: #616161;
+    }
+  }
+
+  .error-state {
+    color: #d32f2f;
+    text-align: center;
+    padding: 20px;
+  }
+}

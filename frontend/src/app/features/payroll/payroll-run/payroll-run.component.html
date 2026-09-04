@@ -1,0 +1,124 @@
+<div class="page-content fade-in">
+  <app-page-header title="Payroll Management" subtitle="Run and manage monthly payroll processing"></app-page-header>
+
+  <mat-card class="run-payroll-card">
+    <mat-card-header>
+      <mat-card-title>Run Payroll</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="run-payroll-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Month</mat-label>
+          <input matInput type="month" [(ngModel)]="selectedMonth">
+        </mat-form-field>
+        <button mat-flat-button color="primary" [disabled]="runningPayroll" (click)="runPayroll()">
+          <mat-icon>play_arrow</mat-icon>
+          {{ runningPayroll ? 'Processing...' : 'Run Payroll' }}
+        </button>
+      </div>
+
+      <!-- Progress Section -->
+      <div *ngIf="runningPayroll" class="progress-section">
+        <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+        <div class="progress-steps">
+          <div class="step" [ngClass]="{'step-active': currentStep >= 1, 'step-done': currentStep > 1}">
+            <mat-icon>{{ currentStep > 1 ? 'check_circle' : 'hourglass_top' }}</mat-icon>
+            <span>Fetching active employees</span>
+          </div>
+          <div class="step" [ngClass]="{'step-active': currentStep >= 2, 'step-done': currentStep > 2}">
+            <mat-icon>{{ currentStep > 2 ? 'check_circle' : (currentStep >= 2 ? 'hourglass_top' : 'radio_button_unchecked') }}</mat-icon>
+            <span>Computing base salaries</span>
+          </div>
+          <div class="step" [ngClass]="{'step-active': currentStep >= 3, 'step-done': currentStep > 3}">
+            <mat-icon>{{ currentStep > 3 ? 'check_circle' : (currentStep >= 3 ? 'hourglass_top' : 'radio_button_unchecked') }}</mat-icon>
+            <span>Applying adjustments</span>
+          </div>
+          <div class="step" [ngClass]="{'step-active': currentStep >= 4, 'step-done': currentStep > 4}">
+            <mat-icon>{{ currentStep > 4 ? 'check_circle' : (currentStep >= 4 ? 'hourglass_top' : 'radio_button_unchecked') }}</mat-icon>
+            <span>Generating payroll snapshot</span>
+          </div>
+          <div class="step" [ngClass]="{'step-active': currentStep >= 5, 'step-done': currentStep > 5}">
+            <mat-icon>{{ currentStep > 5 ? 'check_circle' : (currentStep >= 5 ? 'hourglass_top' : 'radio_button_unchecked') }}</mat-icon>
+            <span>Finalizing payroll run</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="payroll-history">
+    <h2>Payroll History</h2>
+    
+    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+    
+    <div *ngIf="!loading && payrollRuns.length === 0" class="empty-state">
+      <mat-icon>receipt_long</mat-icon>
+      <p>No payroll runs found.</p>
+    </div>
+
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let run of payrollRuns" (opened)="loadPayrollRunDetails(run.month, run)">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <strong>{{ formatMonth(run.month) }}</strong>
+          </mat-panel-title>
+          <mat-panel-description>
+            <div class="run-meta">
+              <span class="trigger-badge">
+                <mat-icon inline>account_tree</mat-icon>
+                {{ run.triggeredBy }}
+              </span>
+              <mat-chip-set>
+                <mat-chip [ngClass]="'status-' + run.status.toLowerCase()">
+                  {{ run.status }}
+                </mat-chip>
+              </mat-chip-set>
+              <span class="run-date" *ngIf="run.runAt">Ran at: {{ run.runAt | date:'medium' }}</span>
+            </div>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="panel-content">
+          <app-loading-spinner *ngIf="!run.lines"></app-loading-spinner>
+
+          <div class="run-summary" *ngIf="run.lines && run.lines.length > 0">
+            <div class="summary-stat">
+              <span class="stat-label">Employees</span>
+              <span class="stat-value">{{ run.lines.length }}</span>
+            </div>
+            <div class="summary-stat">
+               <span class="stat-label">Total Payout</span>
+              <span class="stat-value">{{ getTotalPayout(run) | currency }}</span>
+            </div>
+          </div>
+
+          <table mat-table [dataSource]="run.lines || []" *ngIf="run.lines" class="mat-elevation-z0 lines-table">
+            
+            <ng-container matColumnDef="employeeCode">
+              <th mat-header-cell *matHeaderCellDef> Code </th>
+              <td mat-cell *matCellDef="let line"> {{line.employeeCode}} </td>
+            </ng-container>
+            
+            <ng-container matColumnDef="employeeName">
+              <th mat-header-cell *matHeaderCellDef> Name </th>
+              <td mat-cell *matCellDef="let line"> {{line.employeeName}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="baseSalary">
+              <th mat-header-cell *matHeaderCellDef> Base Salary </th>
+              <td mat-cell *matCellDef="let line"> {{line.baseSalary | currency}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="finalAmount">
+              <th mat-header-cell *matHeaderCellDef> Final Amount </th>
+              <td mat-cell *matCellDef="let line"> <strong>{{line.finalAmount | currency}}</strong> </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>

@@ -1,0 +1,106 @@
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.add-button {
+  border-radius: 8px;
+  padding: 0 24px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(79, 195, 247, 0.4);
+}
+
+.filter-card {
+  margin-bottom: 24px;
+  padding: 16px 24px 0 24px;
+}
+
+.filter-container {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.clear-btn {
+  height: 56px;
+  margin-bottom: 22px;
+}
+
+.table-card {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.employee-name {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.element-row {
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.no-data-cell {
+  padding: 48px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.chip-active {
+  background-color: #e8f5e9 !important;
+  color: #2e7d32 !important;
+  font-weight: 500;
+}
+
+.chip-inactive {
+  background-color: #ffebee !important;
+  color: #c62828 !important;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .header-actions {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .filter-container {
+    flex-direction: column;
+    align-items: stretch;
+    
+    .clear-btn {
+      margin-bottom: 16px;
+    }
+  }
+}

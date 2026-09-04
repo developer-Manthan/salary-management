@@ -1,0 +1,130 @@
+.page-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.back-btn {
+  margin-top: -12px;
+}
+
+.detail-card {
+  margin-bottom: 24px;
+  padding: 16px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  
+  .avatar {
+    background-color: #1976d2;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  .employee-name {
+    font-size: 24px;
+    font-weight: 600;
+  }
+  
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .label {
+    font-size: 13px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .value {
+    font-size: 16px;
+    color: #1a1a2e;
+    font-weight: 500;
+  }
+}
+
+.highlight-item {
+  .label {
+    color: #1976d2;
+    font-weight: 600;
+  }
+  
+  .salary-value {
+    font-size: 28px;
+    color: #1976d2;
+    font-weight: 700;
+  }
+}
+
+.actions-container {
+  padding: 16px;
+  gap: 12px;
+}
+
+.history-card {
+  padding: 16px;
+
+  mat-card-header {
+    margin-bottom: 16px;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.amount-cell {
+  font-weight: 600;
+}
+
+.text-muted {
+  color: #757575;
+  font-size: 13px;
+}
+
+.chip-active {
+  background-color: #e8f5e9 !important;
+  color: #2e7d32 !important;
+  font-weight: 500;
+}
+
+.chip-inactive {
+  background-color: #ffebee !important;
+  color: #c62828 !important;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,72 @@
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard-row {
+  &.split-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    
+    @media (min-width: 992px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+
+.explorer-card {
+  padding: 24px;
+  
+  .explorer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    
+    h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+  }
+
+  .explorer-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    mat-form-field {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: -16px; // Adjust for form-field bottom padding
+    }
+
+    .run-btn {
+      height: 56px; // Match form-field height
+      padding: 0 24px;
+      margin-bottom: 16px; // Align visually with form fields
+    }
+  }
+
+  mat-divider {
+    margin: 16px 0 24px;
+  }
+
+  .explorer-chart-area {
+    position: relative;
+    min-height: 350px;
+    
+    .error-state {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 350px;
+      color: #d32f2f;
+    }
+  }
+}

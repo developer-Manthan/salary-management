@@ -1,0 +1,122 @@
+<div class="page-container fade-in">
+  <div class="header-actions">
+    <app-page-header title="Employees" subtitle="Manage your company's workforce"></app-page-header>
+    <a mat-flat-button color="primary" routerLink="/employees/new" class="add-button">
+      <mat-icon>add</mat-icon> Add Employee
+    </a>
+  </div>
+
+  <mat-card class="filter-card">
+    <mat-card-content class="filter-container">
+      <mat-form-field appearance="outline">
+        <mat-label>Department</mat-label>
+        <mat-select [(ngModel)]="departmentFilter" (selectionChange)="onFilterChange()">
+          <mat-option value="">All Departments</mat-option>
+          <mat-option *ngFor="let dept of departments" [value]="dept">{{ dept }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Country</mat-label>
+        <mat-select [(ngModel)]="countryFilter" (selectionChange)="onFilterChange()">
+          <mat-option value="">All Countries</mat-option>
+          <mat-option *ngFor="let country of countries" [value]="country">{{ country }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="statusFilter" (selectionChange)="onFilterChange()">
+          <mat-option value="">All Statuses</mat-option>
+          <mat-option *ngFor="let status of statuses" [value]="status">{{ status }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-stroked-button (click)="clearFilters()" class="clear-btn">
+        <mat-icon>clear</mat-icon> Clear
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="table-card">
+    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+    
+    <div class="table-container">
+      <table mat-table [dataSource]="employees" matSort (matSortChange)="onSortChange($event)">
+        
+        <ng-container matColumnDef="employeeCode">
+          <th mat-header-cell *matHeaderCellDef> Code </th>
+          <td mat-cell *matCellDef="let element"> {{element.employeeCode}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
+          <td mat-cell *matCellDef="let element">
+            <a [routerLink]="['/employees', element.id]" class="employee-name">{{element.name}}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Department </th>
+          <td mat-cell *matCellDef="let element"> {{element.department}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="jobTitle">
+          <th mat-header-cell *matHeaderCellDef> Job Title </th>
+          <td mat-cell *matCellDef="let element"> {{element.jobTitle}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="country">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Country </th>
+          <td mat-cell *matCellDef="let element"> {{element.country}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="currentSalary">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Salary </th>
+          <td mat-cell *matCellDef="let element"> {{formatCurrency(element.currentSalary, element.currency)}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let element">
+            <mat-chip [ngClass]="element.status === 'ACTIVE' ? 'chip-active' : 'chip-inactive'">
+              {{element.status}}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Actions </th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <a mat-menu-item [routerLink]="['/employees', element.id, 'edit']">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </a>
+              <button mat-menu-item (click)="onDeactivate(element)" [disabled]="element.status === 'INACTIVE'">
+                <mat-icon color="warn">block</mat-icon>
+                <span>Deactivate</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="element-row"></tr>
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="8" class="no-data-cell">No employees found.</td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator [length]="totalElements"
+                   [pageSize]="pageSize"
+                   [pageSizeOptions]="[10, 20, 50]"
+                   (page)="onPageChange($event)"
+                   aria-label="Select page">
+    </mat-paginator>
+  </mat-card>
+</div>
