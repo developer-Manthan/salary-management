@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changes/001-create-employee-table.yaml
+  - include:
+      file: db/changelog/changes/002-create-salary-history-table.yaml
+  - include:
+      file: db/changelog/changes/003-create-payroll-cycle-table.yaml
+  - include:
+      file: db/changelog/changes/004-create-pay-slip-table.yaml

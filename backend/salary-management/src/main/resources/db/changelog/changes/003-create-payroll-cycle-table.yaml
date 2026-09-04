@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-create-payroll-cycle-table
+      author: manthan
+      changes:
+        - createTable:
+            tableName: payroll_cycle
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: month
+                  type: VARCHAR(7)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: triggered_by
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: run_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: 'PROCESSING'
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
