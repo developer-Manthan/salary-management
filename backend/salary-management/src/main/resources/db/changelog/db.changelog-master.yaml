@@ -7,3 +7,7 @@ databaseChangeLog:
       file: db/changelog/changes/003-create-payroll-cycle-table.yaml
   - include:
       file: db/changelog/changes/004-create-pay-slip-table.yaml
+  - include:
+      file: db/changelog/changes/005-create-salary-adjustment-table.yaml
+  - include:
+      file: db/changelog/changes/006-alter-table-pay-slip.yaml

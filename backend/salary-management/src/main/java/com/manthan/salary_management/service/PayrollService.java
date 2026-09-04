@@ -3,7 +3,9 @@ package com.manthan.salary_management.service;
 import com.manthan.salary_management.dto.response.PayrollCycleResponse;
 import com.manthan.salary_management.entity.Employee;
 import com.manthan.salary_management.entity.PayrollCycle;
+import com.manthan.salary_management.entity.SalaryAdjustment;
 import com.manthan.salary_management.entity.PaySlip;
+import com.manthan.salary_management.entity.enums.AdjustmentType;
 import com.manthan.salary_management.entity.enums.EmploymentStatus;
 import com.manthan.salary_management.entity.enums.PayrollStatus;
 import com.manthan.salary_management.entity.enums.TriggerType;
@@ -13,6 +15,7 @@ import com.manthan.salary_management.mapper.PayrollMapper;
 import com.manthan.salary_management.repository.EmployeeRepository;
 import com.manthan.salary_management.repository.PaySlipRepository;
 import com.manthan.salary_management.repository.PayrollCycleRepository;
+import com.manthan.salary_management.repository.SalaryAdjustmentRepository;
 import com.manthan.salary_management.repository.SalaryHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +39,7 @@ public class PayrollService {
     private final PaySlipRepository paySlipRepository;
     private final EmployeeRepository employeeRepository;
     private final SalaryHistoryRepository salaryHistoryRepository;
+    private final SalaryAdjustmentRepository salaryAdjustmentRepository;
 
     @Transactional
     public PayrollCycleResponse runPayroll(String month, TriggerType triggerType) {
@@ -46,7 +50,6 @@ public class PayrollService {
         log.info("Starting payroll run for month: {}", month);
         long startTime = System.currentTimeMillis();
 
-        // 1. Create payroll run record
         PayrollCycle payrollCycle = PayrollCycle.builder()
                 .month(month)
                 .triggeredBy(triggerType)
@@ -55,13 +58,11 @@ public class PayrollService {
                 .build();
         payrollCycle = payrollCycleRepository.save(payrollCycle);
 
-        // 2. Bulk fetch active employees (1 query)
         List<Employee> activeEmployees = employeeRepository.findAll().stream()
                 .filter(e -> e.getStatus() == EmploymentStatus.ACTIVE)
                 .collect(Collectors.toList());
         log.info("Found {} active employees", activeEmployees.size());
 
-        // 3. Bulk fetch ALL current salaries in one query (1 query instead of N)
         Map<Long, BigDecimal> salaryMap = new HashMap<>();
         List<Object[]> allSalaries = salaryHistoryRepository.findAllCurrentSalaries();
         for (Object[] row : allSalaries) {
@@ -71,19 +72,36 @@ public class PayrollService {
         }
         log.info("Loaded {} salary records in bulk", salaryMap.size());
 
-        // 4. Build paySlips (pure computation, no DB calls)
+        List<SalaryAdjustment> allAdjustments = salaryAdjustmentRepository.findByEffectiveMonth(month);
+        Map<Long, List<SalaryAdjustment>> adjustmentMap = allAdjustments.stream()
+                .collect(Collectors.groupingBy(adj -> adj.getEmployee().getId()));
+        log.info("Loaded {} adjustments for month {}", allAdjustments.size(), month);
+
         List<PaySlip> paySlips = new ArrayList<>();
         for (Employee employee : activeEmployees) {
             BigDecimal baseSalary = salaryMap.getOrDefault(employee.getId(), BigDecimal.ZERO);
+
+            List<SalaryAdjustment> empAdjustments = adjustmentMap.getOrDefault(employee.getId(), List.of());
+            BigDecimal totalAdjustments = BigDecimal.ZERO;
+            for (SalaryAdjustment adjustment : empAdjustments) {
+                if (adjustment.getType() == AdjustmentType.DEDUCTION) {
+                    totalAdjustments = totalAdjustments.subtract(adjustment.getAmount());
+                } else {
+                    totalAdjustments = totalAdjustments.add(adjustment.getAmount());
+                }
+            }
+
+            BigDecimal finalAmount = baseSalary.add(totalAdjustments);
 
             paySlips.add(PaySlip.builder()
                     .payrollCycle(payrollCycle)
                     .employee(employee)
                     .baseSalary(baseSalary)
+                    .totalAdjustments(totalAdjustments)
+                    .finalAmount(finalAmount)
                     .build());
         }
 
-        // 5. Bulk save all paySlips
         paySlipRepository.saveAll(paySlips);
 
         payrollCycle.setStatus(PayrollStatus.COMPLETED);

@@ -90,6 +90,10 @@
                <span class="stat-label">Total Payout</span>
               <span class="stat-value">{{ getTotalPayout(run) | currency }}</span>
             </div>
+            <div class="summary-stat">
+               <span class="stat-label">Total Adjustments</span>
+              <span class="stat-value">{{ getTotalAdjustment(run) | currency }}</span>
+            </div>
           </div>
 
           <table mat-table [dataSource]="run.paySlips || []" *ngIf="run.paySlips" class="mat-elevation-z0 lines-table">
@@ -107,6 +111,13 @@
             <ng-container matColumnDef="baseSalary">
               <th mat-header-cell *matHeaderCellDef> Base Salary </th>
               <td mat-cell *matCellDef="let line"> {{line.baseSalary | currency}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalAdjustments">
+              <th mat-header-cell *matHeaderCellDef> Adjustments </th>
+              <td mat-cell *matCellDef="let line" [ngClass]="{'positive-adj': line.totalAdjustments > 0, 'negative-adj': line.totalAdjustments < 0}"> 
+                {{line.totalAdjustments | currency}} 
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="finalAmount">

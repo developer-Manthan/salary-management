@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-alter-table-pay-slip
+      author: manthan
+      changes:
+        - addColumn:
+            tableName: pay_slip
+            columns:
+              - column:
+                  name: total_adjustments
+                  type: DECIMAL(15,2)
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: final_amount
+                  type: DECIMAL(15,2)
+                  constraints:
+                    nullable: true 
+
+        - sql:
+            sql: >
+              UPDATE pay_slip 
+              SET final_amount = base_salary;
+
+        - addNotNullConstraint:
+            tableName: pay_slip
+            columnName: final_amount
+            columnDataType: DECIMAL(15,2)

@@ -1,8 +1,10 @@
 package com.manthan.salary_management.mapper;
 
+import com.manthan.salary_management.dto.response.AdjustmentResponse;
 import com.manthan.salary_management.dto.response.PaySlipResponse;
 import com.manthan.salary_management.dto.response.PayrollCycleResponse;
 import com.manthan.salary_management.entity.PayrollCycle;
+import com.manthan.salary_management.entity.SalaryAdjustment;
 import com.manthan.salary_management.entity.PaySlip;
 
 import java.util.List;
@@ -44,6 +46,23 @@ public class PayrollMapper {
                 .employeeCode(entity.getEmployee().getEmployeeCode())
                 .employeeName(entity.getEmployee().getName())
                 .baseSalary(entity.getBaseSalary())
+                .totalAdjustments(entity.getTotalAdjustments())
+                .finalAmount(entity.getFinalAmount())
+                .build();
+    }
+
+    public static AdjustmentResponse toAdjustmentResponse(SalaryAdjustment entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return AdjustmentResponse.builder()
+                .id(entity.getId())
+                .type(entity.getType().name())
+                .amount(entity.getAmount())
+                .effectiveMonth(entity.getEffectiveMonth())
+                .note(entity.getNote())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 }

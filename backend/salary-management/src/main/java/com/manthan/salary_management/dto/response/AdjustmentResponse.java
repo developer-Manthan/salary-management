@@ -6,17 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaySlipResponse {
+public class AdjustmentResponse {
     private Long id;
-    private Long employeeId;
-    private String employeeCode;
-    private String employeeName;
-    private BigDecimal baseSalary;
-    private BigDecimal totalAdjustments;
-    private BigDecimal finalAmount;
+    private String type;
+    private BigDecimal amount;
+    private String effectiveMonth;
+    private String note;
+    private LocalDateTime createdAt;
 }

@@ -1,8 +1,13 @@
 package com.manthan.salary_management.controller;
 
+import com.manthan.salary_management.dto.request.CreateAdjustmentRequest;
+import com.manthan.salary_management.dto.response.AdjustmentResponse;
 import com.manthan.salary_management.dto.response.PayrollCycleResponse;
 import com.manthan.salary_management.entity.enums.TriggerType;
 import com.manthan.salary_management.service.PayrollService;
+import com.manthan.salary_management.service.SalaryAdjustmentService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +21,7 @@ import java.util.List;
 public class PayrollController {
 
     private final PayrollService payrollService;
+    private final SalaryAdjustmentService salaryAdjustmentService;
 
     @PostMapping("/payroll-cycle/{month}")
     public ResponseEntity<PayrollCycleResponse> triggerPayroll(@PathVariable String month) {
@@ -32,6 +38,22 @@ public class PayrollController {
     @GetMapping("/payroll-cycles")
     public ResponseEntity<List<PayrollCycleResponse>> getPayrollCycles() {
         List<PayrollCycleResponse> responses = payrollService.getPayrollCycles();
+        return ResponseEntity.ok(responses);
+    }
+
+    @PostMapping("/employees/{employeeId}/adjustments")
+    public ResponseEntity<AdjustmentResponse> createAdjustment(
+            @PathVariable Long employeeId,
+            @Valid @RequestBody CreateAdjustmentRequest request) {
+        AdjustmentResponse response = salaryAdjustmentService.createAdjustment(employeeId, request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/employees/{employeeId}/adjustments")
+    public ResponseEntity<List<AdjustmentResponse>> getAdjustments(
+            @PathVariable Long employeeId,
+            @RequestParam(required = false) String month) {
+        List<AdjustmentResponse> responses = salaryAdjustmentService.getAdjustments(employeeId, month);
         return ResponseEntity.ok(responses);
     }
 }

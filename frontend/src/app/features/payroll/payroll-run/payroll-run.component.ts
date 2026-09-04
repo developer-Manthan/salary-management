@@ -57,7 +57,7 @@ export class PayrollRunComponent implements OnInit {
   currentStep = 0;
   private stepInterval: any;
 
-  displayedColumns: string[] = ['employeeCode', 'employeeName', 'baseSalary', 'finalAmount'];
+  displayedColumns: string[] = ['employeeCode', 'employeeName', 'baseSalary', 'totalAdjustments', 'finalAmount'];
 
   ngOnInit(): void {
     this.loadPayrollRuns();
@@ -168,6 +168,11 @@ export class PayrollRunComponent implements OnInit {
   getTotalPayout(run: PayrollRun): number {
     if (!run.paySlips) return 0;
     return run.paySlips.reduce((sum, line) => sum + line.finalAmount, 0);
+  }
+
+  getTotalAdjustment(run: PayrollRun): number {
+    if (!run.paySlips) return 0;
+    return run.paySlips.reduce((sum, line) => sum + line.totalAdjustments, 0);
   }
 
   formatMonth(monthString: string): string {

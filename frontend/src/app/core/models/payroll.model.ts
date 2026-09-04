@@ -13,5 +13,22 @@ export interface PayrollRunLine {
   employeeCode: string;
   employeeName: string;
   baseSalary: number;
-    finalAmount: number;
+  totalAdjustments: number;
+  finalAmount: number;
+}
+
+export interface SalaryAdjustment {
+  id: number;
+  type: 'BONUS' | 'DEDUCTION' | 'REIMBURSEMENT' | 'COMPENSATION';
+  amount: number;
+  effectiveMonth: string;
+  note: string;
+  createdAt: string;
+}
+
+export interface CreateAdjustmentRequest {
+  type: string;
+  amount: number;
+  effectiveMonth: string;
+  note?: string;
 }

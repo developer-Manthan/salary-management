@@ -1,8 +1,11 @@
 package com.manthan.salary_management.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.manthan.salary_management.entity.enums.AdjustmentType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,12 +24,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "pay_slip")
+@Table(name = "salary_adjustment")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaySlip {
+public class SalaryAdjustment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,21 +37,21 @@ public class PaySlip {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payroll_cycle_id", nullable = false)
-    private PayrollCycle payrollCycle;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @Column(name = "base_salary", nullable = false, precision = 15, scale = 2)
-    private BigDecimal baseSalary;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private AdjustmentType type;
 
-    @Column(name = "total_adjustments", nullable = false, precision = 15, scale = 2)
-    private BigDecimal totalAdjustments;
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal amount;
 
-    @Column(name = "final_amount", nullable = false, precision = 15, scale = 2)
-    private BigDecimal finalAmount;
+    @Column(name = "effective_month", nullable = false, length = 7)
+    private String effectiveMonth;
+
+    @Column(length = 255)
+    private String note;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
