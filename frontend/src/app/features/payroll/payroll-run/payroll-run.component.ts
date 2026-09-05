@@ -11,16 +11,30 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { PayrollService } from '../../../core/services/payroll.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { PayrollRun } from '../../../core/models/payroll.model';
+import { PayrollRun, PayrollRunLine, PagedResponse } from '../../../core/models/payroll.model';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+
+interface ExpandedRunState {
+  paySlips: PayrollRunLine[];
+  totalElements: number;
+  currentPage: number;
+  pageSize: number;
+  searchTerm: string;
+  loading: boolean;
+  totalPayout: number;
+  totalAdjustments: number;
+}
 
 @Component({
   selector: 'app-payroll-run',
@@ -38,6 +52,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
     MatDividerModule,
     MatExpansionModule,
     MatProgressBarModule,
+    MatPaginatorModule,
     FormsModule,
     PageHeaderComponent,
     LoadingSpinnerComponent
@@ -56,6 +71,10 @@ export class PayrollRunComponent implements OnInit {
   runningPayroll = false;
   currentStep = 0;
   private stepInterval: any;
+
+  // Track expanded state per run month
+  expandedStates: Map<string, ExpandedRunState> = new Map();
+  searchSubjects: Map<string, Subject<string>> = new Map();
 
   displayedColumns: string[] = ['employeeCode', 'employeeName', 'baseSalary', 'totalAdjustments', 'finalAmount'];
 
@@ -151,28 +170,77 @@ export class PayrollRunComponent implements OnInit {
     this.currentStep = 0;
   }
 
-  loadPayrollRunDetails(month: string, run: PayrollRun): void {
-    if (!run.paySlips || run.paySlips.length === 0) {
-      this.payrollService.getPayrollRun(month).subscribe({
-        next: (data) => {
-          run.paySlips = data.paySlips;
-        },
-        error: (err) => {
-          this.notificationService.error('Failed to load payroll details');
-          console.error(err);
-        }  
+  // --- Paginated panel logic ---
+
+  getState(month: string): ExpandedRunState {
+    if (!this.expandedStates.has(month)) {
+      this.expandedStates.set(month, {
+        paySlips: [],
+        totalElements: 0,
+        currentPage: 0,
+        pageSize: 20,
+        searchTerm: '',
+        loading: false,
+        totalPayout: 0,
+        totalAdjustments: 0
       });
+    }
+    return this.expandedStates.get(month)!;
+  }
+
+  onPanelOpened(month: string): void {
+    const state = this.getState(month);
+    if (state.paySlips.length === 0 && !state.loading) {
+      this.loadLines(month);
+    }
+    // Setup search debounce
+    if (!this.searchSubjects.has(month)) {
+      const subject = new Subject<string>();
+      subject.pipe(
+        debounceTime(400),
+        distinctUntilChanged()
+      ).subscribe(term => {
+        const s = this.getState(month);
+        s.searchTerm = term;
+        s.currentPage = 0;
+        this.loadLines(month);
+      });
+      this.searchSubjects.set(month, subject);
     }
   }
 
-  getTotalPayout(run: PayrollRun): number {
-    if (!run.paySlips) return 0;
-    return run.paySlips.reduce((sum, line) => sum + line.finalAmount, 0);
+  loadLines(month: string): void {
+    const state = this.getState(month);
+    state.loading = true;
+    const search = state.searchTerm || undefined;
+
+    this.payrollService.getPayrollRunLines(month, state.currentPage, state.pageSize, search).subscribe({
+      next: (page: PagedResponse<PayrollRunLine>) => {
+        state.paySlips = page.content;
+        state.totalElements = page.totalElements;
+        state.loading = false;
+
+        // Compute summary from current page
+        state.totalPayout = page.content.reduce((sum, l) => sum + l.finalAmount, 0);
+        state.totalAdjustments = page.content.reduce((sum, l) => sum + l.totalAdjustments, 0);
+      },
+      error: () => {
+        this.notificationService.error('Failed to load payroll details');
+        state.loading = false;
+      }
+    });
   }
 
-  getTotalAdjustment(run: PayrollRun): number {
-    if (!run.paySlips) return 0;
-    return run.paySlips.reduce((sum, line) => sum + line.totalAdjustments, 0);
+  onSearchInput(month: string, event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchSubjects.get(month)?.next(value);
+  }
+
+  onPageChange(month: string, event: PageEvent): void {
+    const state = this.getState(month);
+    state.currentPage = event.pageIndex;
+    state.pageSize = event.pageSize;
+    this.loadLines(month);
   }
 
   formatMonth(monthString: string): string {

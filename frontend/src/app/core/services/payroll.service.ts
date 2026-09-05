@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateAdjustmentRequest, PayrollRun, SalaryAdjustment } from '../models/payroll.model';
+import { CreateAdjustmentRequest, PagedResponse, PayrollRun, PayrollRunLine, SalaryAdjustment } from '../models/payroll.model';
 
 @Injectable({ providedIn: 'root' })
 export class PayrollService {
@@ -17,6 +17,16 @@ export class PayrollService {
   
   getPayrollRuns(): Observable<PayrollRun[]> {
     return this.http.get<PayrollRun[]>('/api/v1/payroll-cycles');
+  }
+
+  getPayrollRunLines(month: string, page: number = 0, size: number = 20, search?: string): Observable<PagedResponse<PayrollRunLine>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    if (search) {
+      params = params.set('search', search);
+    }
+    return this.http.get<PagedResponse<PayrollRunLine>>(`/api/v1/pay-slips/${month}`, { params });
   }
 
   createAdjustment(employeeId: number, request: CreateAdjustmentRequest): Observable<SalaryAdjustment> {

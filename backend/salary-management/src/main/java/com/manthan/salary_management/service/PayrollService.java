@@ -1,5 +1,6 @@
 package com.manthan.salary_management.service;
 
+import com.manthan.salary_management.dto.response.PaySlipResponse;
 import com.manthan.salary_management.dto.response.PayrollCycleResponse;
 import com.manthan.salary_management.entity.Employee;
 import com.manthan.salary_management.entity.PayrollCycle;
@@ -19,6 +20,9 @@ import com.manthan.salary_management.repository.SalaryAdjustmentRepository;
 import com.manthan.salary_management.repository.SalaryHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -128,5 +132,18 @@ public class PayrollService {
         return payrollCycleRepository.findAllByOrderByMonthDesc().stream()
                 .map(run -> PayrollMapper.toPayrollCycleResponse(run, null))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PaySlipResponse> getPaySlips(String month, String search, Pageable pageable) {
+        PayrollCycle payrollCycle = payrollCycleRepository.findByMonth(month)
+                .orElseThrow(() -> new ResourceNotFoundException("PayrollCycle", "month", month));
+
+        String searchParam = (search != null && !search.isBlank()) ? search.trim() : null;
+
+        Page<PaySlip> page = paySlipRepository.findByPayrollCycleIdWithSearch(
+                payrollCycle.getId(), searchParam, pageable);
+
+        return page.map(PayrollMapper::toPaySlipResponse);
     }
 }

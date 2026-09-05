@@ -2,6 +2,7 @@ package com.manthan.salary_management.controller;
 
 import com.manthan.salary_management.dto.request.CreateAdjustmentRequest;
 import com.manthan.salary_management.dto.response.AdjustmentResponse;
+import com.manthan.salary_management.dto.response.PaySlipResponse;
 import com.manthan.salary_management.dto.response.PayrollCycleResponse;
 import com.manthan.salary_management.entity.enums.TriggerType;
 import com.manthan.salary_management.service.PayrollService;
@@ -9,6 +10,10 @@ import com.manthan.salary_management.service.SalaryAdjustmentService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +44,17 @@ public class PayrollController {
     public ResponseEntity<List<PayrollCycleResponse>> getPayrollCycles() {
         List<PayrollCycleResponse> responses = payrollService.getPayrollCycles();
         return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/pay-slips/{month}")
+    public ResponseEntity<Page<PaySlipResponse>> getPaySlips(
+            @PathVariable String month,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PaySlipResponse> paySlips = payrollService.getPaySlips(month, search, pageable);
+        return ResponseEntity.ok(paySlips);
     }
 
     @PostMapping("/employees/{employeeId}/adjustments")

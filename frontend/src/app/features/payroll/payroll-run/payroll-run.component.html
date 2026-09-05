@@ -57,7 +57,7 @@
     </div>
 
     <mat-accordion>
-      <mat-expansion-panel *ngFor="let run of payrollRuns" (opened)="loadPayrollRunDetails(run.month, run)">
+      <mat-expansion-panel *ngFor="let run of payrollRuns" (opened)="onPanelOpened(run.month)">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <strong>{{ formatMonth(run.month) }}</strong>
@@ -79,55 +79,84 @@
         </mat-expansion-panel-header>
 
         <div class="panel-content">
-          <app-loading-spinner *ngIf="!run.paySlips"></app-loading-spinner>
+          <!-- Search bar -->
+          <div class="search-bar">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search employees</mat-label>
+              <input matInput placeholder="Search by name or code..." 
+                     (input)="onSearchInput(run.month, $event)"
+                     [value]="getState(run.month).searchTerm">
+              <mat-icon matPrefix>search</mat-icon>
+            </mat-form-field>
+            <span class="result-count" *ngIf="!getState(run.month).loading">
+              {{ getState(run.month).totalElements }} employees
+            </span>
+          </div>
 
-          <div class="run-summary" *ngIf="run.paySlips && run.paySlips.length > 0">
+          <!-- Summary stats -->
+          <div class="run-summary" *ngIf="getState(run.month).paySlips.length > 0">
             <div class="summary-stat">
-              <span class="stat-label">Employees</span>
-              <span class="stat-value">{{ run.paySlips.length }}</span>
+              <span class="stat-label">Page Employees</span>
+              <span class="stat-value">{{ getState(run.month).paySlips.length }}</span>
             </div>
             <div class="summary-stat">
-               <span class="stat-label">Total Payout</span>
-              <span class="stat-value">{{ getTotalPayout(run) | currency }}</span>
+              <span class="stat-label">Page Payout</span>
+              <span class="stat-value">{{ getState(run.month).totalPayout | currency }}</span>
             </div>
             <div class="summary-stat">
-               <span class="stat-label">Total Adjustments</span>
-              <span class="stat-value">{{ getTotalAdjustment(run) | currency }}</span>
+              <span class="stat-label">Page Adjustments</span>
+              <span class="stat-value">{{ getState(run.month).totalAdjustments | currency }}</span>
             </div>
           </div>
 
-          <table mat-table [dataSource]="run.paySlips || []" *ngIf="run.paySlips" class="mat-elevation-z0 lines-table">
-            
-            <ng-container matColumnDef="employeeCode">
-              <th mat-header-cell *matHeaderCellDef> Code </th>
-              <td mat-cell *matCellDef="let line"> {{line.employeeCode}} </td>
-            </ng-container>
-            
-            <ng-container matColumnDef="employeeName">
-              <th mat-header-cell *matHeaderCellDef> Name </th>
-              <td mat-cell *matCellDef="let line"> {{line.employeeName}} </td>
-            </ng-container>
+          <app-loading-spinner *ngIf="getState(run.month).loading"></app-loading-spinner>
 
-            <ng-container matColumnDef="baseSalary">
-              <th mat-header-cell *matHeaderCellDef> Base Salary </th>
-              <td mat-cell *matCellDef="let line"> {{line.baseSalary | currency}} </td>
-            </ng-container>
+          <div class="table-container" *ngIf="!getState(run.month).loading">
+            <table mat-table [dataSource]="getState(run.month).paySlips" class="mat-elevation-z0 lines-table">
+              
+              <ng-container matColumnDef="employeeCode">
+                <th mat-header-cell *matHeaderCellDef> Code </th>
+                <td mat-cell *matCellDef="let line"> {{line.employeeCode}} </td>
+              </ng-container>
+              
+              <ng-container matColumnDef="employeeName">
+                <th mat-header-cell *matHeaderCellDef> Name </th>
+                <td mat-cell *matCellDef="let line"> {{line.employeeName}} </td>
+              </ng-container>
 
-            <ng-container matColumnDef="totalAdjustments">
-              <th mat-header-cell *matHeaderCellDef> Adjustments </th>
-              <td mat-cell *matCellDef="let line" [ngClass]="{'positive-adj': line.totalAdjustments > 0, 'negative-adj': line.totalAdjustments < 0}"> 
-                {{line.totalAdjustments | currency}} 
-              </td>
-            </ng-container>
+              <ng-container matColumnDef="baseSalary">
+                <th mat-header-cell *matHeaderCellDef> Base Salary </th>
+                <td mat-cell *matCellDef="let line"> {{line.baseSalary | currency}} </td>
+              </ng-container>
 
-            <ng-container matColumnDef="finalAmount">
-              <th mat-header-cell *matHeaderCellDef> Final Amount </th>
-              <td mat-cell *matCellDef="let line"> <strong>{{line.finalAmount | currency}}</strong> </td>
-            </ng-container>
+              <ng-container matColumnDef="totalAdjustments">
+                <th mat-header-cell *matHeaderCellDef> Adjustments </th>
+                <td mat-cell *matCellDef="let line" [ngClass]="{'positive-adj': line.totalAdjustments > 0, 'negative-adj': line.totalAdjustments < 0}"> 
+                  {{line.totalAdjustments | currency}} 
+                </td>
+              </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
+              <ng-container matColumnDef="finalAmount">
+                <th mat-header-cell *matHeaderCellDef> Final Amount </th>
+                <td mat-cell *matCellDef="let line"> <strong>{{line.finalAmount | currency}}</strong> </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell no-data-cell" colspan="5">No matching employees found.</td>
+              </tr>
+            </table>
+
+            <mat-paginator
+              [length]="getState(run.month).totalElements"
+              [pageSize]="getState(run.month).pageSize"
+              [pageIndex]="getState(run.month).currentPage"
+              [pageSizeOptions]="[10, 20, 50, 100]"
+              (page)="onPageChange(run.month, $event)"
+              showFirstLastButtons>
+            </mat-paginator>
+          </div>
         </div>
       </mat-expansion-panel>
     </mat-accordion>
