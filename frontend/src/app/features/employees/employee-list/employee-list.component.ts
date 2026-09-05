@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 import { EmployeeService } from '../../../core/services/employee.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -46,7 +48,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
   templateUrl: './employee-list.component.html',
   styleUrl: './employee-list.component.scss'
 })
-export class EmployeeListComponent implements OnInit {
+export class EmployeeListComponent implements OnInit, OnDestroy {
   private employeeService = inject(EmployeeService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
@@ -57,6 +59,7 @@ export class EmployeeListComponent implements OnInit {
   
   displayedColumns: string[] = ['employeeCode', 'name', 'department', 'jobTitle', 'country', 'currentSalary', 'status', 'actions'];
 
+  searchTerm = '';
   departmentFilter = '';
   countryFilter = '';
   statusFilter = '';
@@ -70,8 +73,31 @@ export class EmployeeListComponent implements OnInit {
   sortField = 'name';
   sortDirection = 'asc';
 
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
+
   ngOnInit(): void {
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      this.searchTerm = term;
+      this.pageIndex = 0;
+      this.loadEmployees();
+    });
+
     this.loadEmployees();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onSearchInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchSubject.next(value);
   }
 
   loadEmployees(): void {
@@ -83,6 +109,7 @@ export class EmployeeListComponent implements OnInit {
       sort: `${this.sortField},${this.sortDirection}`
     };
 
+    if (this.searchTerm) params.search = this.searchTerm;
     if (this.departmentFilter) params.department = this.departmentFilter;
     if (this.countryFilter) params.country = this.countryFilter;
     if (this.statusFilter) params.status = this.statusFilter;
@@ -120,6 +147,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   clearFilters(): void {
+    this.searchTerm = '';
     this.departmentFilter = '';
     this.countryFilter = '';
     this.statusFilter = '';

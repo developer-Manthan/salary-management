@@ -26,11 +26,12 @@ public class EmployeeController {
 
     @GetMapping
     public ResponseEntity<Page<EmployeeResponse>> getEmployees(
+            @RequestParam(required = false) String search,
             @RequestParam(required = false) String department,
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String status,
             @PageableDefault(size = 20, sort = "name") Pageable pageable) {
-        return ResponseEntity.ok(employeeService.getAllEmployees(department, country, status, pageable));
+        return ResponseEntity.ok(employeeService.getAllEmployees(search, department, country, status, pageable));
     }
 
     @GetMapping("/{id}")

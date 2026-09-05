@@ -8,6 +8,17 @@
 
   <mat-card class="filter-card">
     <mat-card-content class="filter-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search employees</mat-label>
+        <input matInput placeholder="Search by name, code, or job title..."
+               (input)="onSearchInput($event)"
+               [value]="searchTerm">
+        <mat-icon matPrefix>search</mat-icon>
+        <button *ngIf="searchTerm" mat-icon-button matSuffix (click)="searchTerm = ''; onFilterChange()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+
       <mat-form-field appearance="outline">
         <mat-label>Department</mat-label>
         <mat-select [(ngModel)]="departmentFilter" (selectionChange)="onFilterChange()">
@@ -35,6 +46,10 @@
       <button mat-stroked-button (click)="clearFilters()" class="clear-btn">
         <mat-icon>clear</mat-icon> Clear
       </button>
+
+      <span class="result-count" *ngIf="!loading">
+        {{ totalElements }} result{{ totalElements !== 1 ? 's' : '' }}
+      </span>
     </mat-card-content>
   </mat-card>
 

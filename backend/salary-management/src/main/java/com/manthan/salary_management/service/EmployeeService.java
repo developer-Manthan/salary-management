@@ -37,9 +37,17 @@ public class EmployeeService {
     private final SalaryHistoryRepository salaryHistoryRepository;
 
     @Transactional(readOnly = true)
-    public Page<EmployeeResponse> getAllEmployees(String department, String country, String status, Pageable pageable) {
+    public Page<EmployeeResponse> getAllEmployees(String search, String department, String country, String status, Pageable pageable) {
         Specification<Employee> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+
+            if (StringUtils.hasText(search)) {
+                String pattern = "%" + search.trim().toLowerCase() + "%";
+                Predicate nameLike = cb.like(cb.lower(root.get("name")), pattern);
+                Predicate codeLike = cb.like(cb.lower(root.get("employeeCode")), pattern);
+                Predicate titleLike = cb.like(cb.lower(root.get("jobTitle")), pattern);
+                predicates.add(cb.or(nameLike, codeLike, titleLike));
+            }
             if (StringUtils.hasText(department)) {
                 predicates.add(cb.equal(root.get("department"), department));
             }

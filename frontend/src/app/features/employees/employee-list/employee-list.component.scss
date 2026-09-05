@@ -35,10 +35,23 @@
     flex: 1;
     min-width: 200px;
   }
+
+  .search-field {
+    flex: 2;
+    min-width: 300px;
+  }
 }
 
 .clear-btn {
   height: 56px;
+  margin-bottom: 22px;
+}
+
+.result-count {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
   margin-bottom: 22px;
 }
 
