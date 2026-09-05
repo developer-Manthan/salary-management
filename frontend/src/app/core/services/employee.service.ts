@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Employee, EmployeeDetail, CreateEmployeeRequest, UpdateEmployeeRequest, SalaryHistory } from '../models/employee.model';
+import { Employee, EmployeeDetail, CreateEmployeeRequest, UpdateEmployeeRequest, SalaryHistory, EmployeePayslip } from '../models/employee.model';
 import { Page } from '../models/page.model';
 
 @Injectable({ providedIn: 'root' })
@@ -39,5 +39,9 @@ export class EmployeeService {
 
   deactivateEmployee(id: number): Observable<Employee> {
     return this.http.put<Employee>(`${this.baseUrl}/${id}/deactivate`, {});
+  }
+
+  getPayslips(id: number): Observable<EmployeePayslip[]> {
+    return this.http.get<EmployeePayslip[]>(`${this.baseUrl}/${id}/payslips`);
   }
 }

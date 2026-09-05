@@ -3,6 +3,7 @@ package com.manthan.salary_management.controller;
 import com.manthan.salary_management.dto.request.CreateEmployeeRequest;
 import com.manthan.salary_management.dto.request.UpdateEmployeeRequest;
 import com.manthan.salary_management.dto.response.EmployeeDetailResponse;
+import com.manthan.salary_management.dto.response.EmployeePayslipResponse;
 import com.manthan.salary_management.dto.response.EmployeeResponse;
 import com.manthan.salary_management.dto.response.SalaryHistoryResponse;
 import com.manthan.salary_management.service.EmployeeService;
@@ -66,5 +67,10 @@ public class EmployeeController {
     @GetMapping("/{id}/salary-history")
     public ResponseEntity<List<SalaryHistoryResponse>> getSalaryHistory(@PathVariable Long id) {
         return ResponseEntity.ok(employeeService.getSalaryHistory(id));
+    }
+
+    @GetMapping("/{id}/payslips")
+    public ResponseEntity<List<EmployeePayslipResponse>> getPayslips(@PathVariable Long id) {
+        return ResponseEntity.ok(employeeService.getPayslips(id));
     }
 }

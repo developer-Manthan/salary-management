@@ -43,3 +43,13 @@ export interface UpdateEmployeeRequest {
   newSalary?: number;
   salaryChangeReason?: string;
 }
+
+export interface EmployeePayslip {
+  payrollCycleId: number;
+  month: string;
+  status: string;
+  runAt: string;
+  baseSalary: number;
+  totalAdjustments: number;
+  finalAmount: number;
+}

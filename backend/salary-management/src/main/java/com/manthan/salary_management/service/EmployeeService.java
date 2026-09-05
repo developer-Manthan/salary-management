@@ -3,6 +3,7 @@ package com.manthan.salary_management.service;
 import com.manthan.salary_management.dto.request.CreateEmployeeRequest;
 import com.manthan.salary_management.dto.request.UpdateEmployeeRequest;
 import com.manthan.salary_management.dto.response.EmployeeDetailResponse;
+import com.manthan.salary_management.dto.response.EmployeePayslipResponse;
 import com.manthan.salary_management.dto.response.EmployeeResponse;
 import com.manthan.salary_management.dto.response.SalaryHistoryResponse;
 import com.manthan.salary_management.entity.Employee;
@@ -12,6 +13,7 @@ import com.manthan.salary_management.exception.DuplicateResourceException;
 import com.manthan.salary_management.exception.ResourceNotFoundException;
 import com.manthan.salary_management.mapper.EmployeeMapper;
 import com.manthan.salary_management.repository.EmployeeRepository;
+import com.manthan.salary_management.repository.PaySlipRepository;
 import com.manthan.salary_management.repository.SalaryHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,6 +38,7 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final SalaryHistoryRepository salaryHistoryRepository;
     private final CacheEvictionService cacheEvictionService;
+    private final PaySlipRepository paySlipRepository;
 
     @Transactional(readOnly = true)
     public Page<EmployeeResponse> getAllEmployees(String search, String department, String country, String status, String jobTitle, Pageable pageable) {
@@ -184,6 +187,22 @@ public class EmployeeService {
         List<SalaryHistory> history = salaryHistoryRepository.findByEmployeeIdOrderByEffectiveDateDesc(employeeId);
         return history.stream()
                 .map(EmployeeMapper::toSalaryHistoryResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<EmployeePayslipResponse> getPayslips(Long employeeId) {
+        findEmployeeOrThrow(employeeId);
+        return paySlipRepository.findByEmployeeIdOrderByMonthDesc(employeeId).stream()
+                .map(line -> EmployeePayslipResponse.builder()
+                        .payrollCycleId(line.getPayrollCycle().getId())
+                        .month(line.getPayrollCycle().getMonth())
+                        .status(line.getPayrollCycle().getStatus().name())
+                        .runAt(line.getPayrollCycle().getRunAt())
+                        .baseSalary(line.getBaseSalary())
+                        .totalAdjustments(line.getTotalAdjustments())
+                        .finalAmount(line.getFinalAmount())
+                        .build())
                 .collect(Collectors.toList());
     }
 

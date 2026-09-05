@@ -16,6 +16,11 @@ import java.util.List;
 public interface PaySlipRepository extends JpaRepository<PaySlip, Long> {
     List<PaySlip> findByPayrollCycleId(Long payrollCycleId);
 
+    @Query("SELECT ps FROM PaySlip ps JOIN FETCH ps.payrollCycle pc " +
+           "WHERE ps.employee.id = :employeeId AND pc.status = 'COMPLETED' " +
+           "ORDER BY pc.month DESC")
+    List<PaySlip> findByEmployeeIdOrderByMonthDesc(@Param("employeeId") Long employeeId);
+
     @Query("SELECT ps FROM PaySlip ps JOIN FETCH ps.employee e " +
            "WHERE ps.payrollCycle.id = :payrollCycleId " +
            "AND (:search IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :search, '%')) " +

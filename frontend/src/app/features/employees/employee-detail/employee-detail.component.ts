@@ -14,7 +14,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { PayrollService } from '../../../core/services/payroll.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { EmployeeDetail } from '../../../core/models/employee.model';
+import { EmployeeDetail, EmployeePayslip } from '../../../core/models/employee.model';
 import { SalaryAdjustment } from '../../../core/models/payroll.model';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -52,10 +52,13 @@ export class EmployeeDetailComponent implements OnInit {
 
   employee: EmployeeDetail | null = null;
   adjustments: SalaryAdjustment[] = [];
+  payslips: EmployeePayslip[] = [];
   loading = true;
   loadingAdjustments = false;
+  loadingPayslips = false;
   salaryColumns: string[] = ['effectiveDate', 'amount', 'reason', 'createdAt'];
   adjustmentColumns: string[] = ['type', 'amount', 'effectiveMonth', 'note', 'createdAt'];
+  payslipColumns: string[] = ['month', 'baseSalary', 'totalAdjustments', 'finalAmount', 'runAt'];
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -74,6 +77,7 @@ export class EmployeeDetailComponent implements OnInit {
         this.employee = data;
         this.loading = false;
         this.loadAdjustments(id);
+        this.loadPayslips(id);
       },
       error: (err) => {
         this.notificationService.error('Failed to load employee details');
@@ -92,6 +96,19 @@ export class EmployeeDetailComponent implements OnInit {
       },
       error: () => {
         this.loadingAdjustments = false;
+      }
+    });
+  }
+
+  loadPayslips(employeeId: number): void {
+    this.loadingPayslips = true;
+    this.employeeService.getPayslips(employeeId).subscribe({
+      next: (data) => {
+        this.payslips = data;
+        this.loadingPayslips = false;
+      },
+      error: () => {
+        this.loadingPayslips = false;
       }
     });
   }
