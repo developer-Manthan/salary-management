@@ -49,6 +49,25 @@ public class PayrollCycle {
     @Column(nullable = false, length = 20)
     private PayrollStatus status;
 
+    @Column(name = "total_employees")
+    @Builder.Default
+    private Integer totalEmployees = 0;
+
+    @Column(name = "processed_count")
+    @Builder.Default
+    private Integer processedCount = 0;
+
+    @Column(name = "last_completed_batch")
+    @Builder.Default
+    private Integer lastCompletedBatch = -1;
+
+    @Column(name = "retry_count")
+    @Builder.Default
+    private Integer retryCount = 0;
+
+    @Column(name = "error_message", length = 500)
+    private String errorMessage;
+
     @OneToMany(mappedBy = "payrollCycle", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PaySlip> paySlips;
 

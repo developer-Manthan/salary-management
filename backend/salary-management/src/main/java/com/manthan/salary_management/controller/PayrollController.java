@@ -32,7 +32,13 @@ public class PayrollController {
     @PostMapping("/payroll-cycle/{month}")
     public ResponseEntity<PayrollCycleResponse> triggerPayroll(@PathVariable String month) {
         PayrollCycleResponse response = payrollService.runPayroll(month, TriggerType.MANUAL);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.accepted().body(response);
+    }
+
+    @PostMapping("/payroll-cycle/{month}/retry")
+    public ResponseEntity<PayrollCycleResponse> retryPayroll(@PathVariable String month) {
+        PayrollCycleResponse response = payrollService.retryPayroll(month);
+        return ResponseEntity.accepted().body(response);
     }
 
     @GetMapping("/payroll-cycle/{month}")

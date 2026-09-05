@@ -18,30 +18,52 @@
       </div>
 
       <!-- Progress Section -->
-      <div *ngIf="runningPayroll" class="progress-section">
-        <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
-        <div class="progress-steps">
-          <div class="step" [ngClass]="{'step-active': currentStep >= 1, 'step-done': currentStep > 1}">
-            <mat-icon>{{ currentStep > 1 ? 'check_circle' : 'hourglass_top' }}</mat-icon>
-            <span>Fetching active employees</span>
-          </div>
-          <div class="step" [ngClass]="{'step-active': currentStep >= 2, 'step-done': currentStep > 2}">
-            <mat-icon>{{ currentStep > 2 ? 'check_circle' : (currentStep >= 2 ? 'hourglass_top' : 'radio_button_unchecked') }}</mat-icon>
-            <span>Computing base salaries</span>
-          </div>
-          <div class="step" [ngClass]="{'step-active': currentStep >= 3, 'step-done': currentStep > 3}">
-            <mat-icon>{{ currentStep > 3 ? 'check_circle' : (currentStep >= 3 ? 'hourglass_top' : 'radio_button_unchecked') }}</mat-icon>
-            <span>Applying adjustments</span>
-          </div>
-          <div class="step" [ngClass]="{'step-active': currentStep >= 4, 'step-done': currentStep > 4}">
-            <mat-icon>{{ currentStep > 4 ? 'check_circle' : (currentStep >= 4 ? 'hourglass_top' : 'radio_button_unchecked') }}</mat-icon>
-            <span>Generating payroll snapshot</span>
-          </div>
-          <div class="step" [ngClass]="{'step-active': currentStep >= 5, 'step-done': currentStep > 5}">
-            <mat-icon>{{ currentStep > 5 ? 'check_circle' : (currentStep >= 5 ? 'hourglass_top' : 'radio_button_unchecked') }}</mat-icon>
-            <span>Finalizing payroll run</span>
-          </div>
+      <div *ngIf="activeRun && (activeRun.status === 'QUEUED' || activeRun.status === 'PROCESSING')" class="progress-section">
+        <div class="progress-header">
+          <mat-chip-set>
+            <mat-chip [ngClass]="'status-' + activeRun.status.toLowerCase()">
+              {{ activeRun.status }}
+            </mat-chip>
+          </mat-chip-set>
+          <span class="month-label">{{ formatMonth(activeRun.month) }}</span>
+          <span *ngIf="activeRun.retryCount > 0" class="retry-badge">
+            Retry {{ activeRun.retryCount }}/3
+          </span>
         </div>
+
+        <mat-progress-bar
+          [mode]="activeRun.status === 'QUEUED' ? 'indeterminate' : 'determinate'"
+          [value]="getProgressPercent()"
+          color="primary">
+        </mat-progress-bar>
+
+        <div class="progress-text">
+          <span *ngIf="activeRun.status === 'QUEUED'">Waiting in queue...</span>
+          <span *ngIf="activeRun.status === 'PROCESSING'">
+            {{ activeRun.processedCount | number }} / {{ activeRun.totalEmployees | number }} employees processed
+            ({{ getProgressPercent() }}%)
+          </span>
+        </div>
+      </div>
+
+      <!-- Failed State -->
+      <div *ngIf="activeRun && activeRun.status === 'FAILED'" class="failed-section">
+        <mat-icon color="warn">error</mat-icon>
+        <div class="failed-info">
+          <span class="failed-title">Payroll processing failed for {{ formatMonth(activeRun.month) }}</span>
+          <span class="failed-message">{{ activeRun.errorMessage }}</span>
+          <span class="failed-progress" *ngIf="activeRun.processedCount > 0">
+            {{ activeRun.processedCount | number }} / {{ activeRun.totalEmployees | number }} employees processed before failure
+          </span>
+        </div>
+        <button mat-flat-button color="primary" (click)="retryPayroll(activeRun.month)"
+                *ngIf="activeRun.retryCount < 3">
+          <mat-icon>refresh</mat-icon>
+          Retry from batch {{ activeRun.lastCompletedBatch + 1 }}
+        </button>
+        <button mat-stroked-button (click)="activeRun = null">
+          Dismiss
+        </button>
       </div>
     </mat-card-content>
   </mat-card>

@@ -192,56 +192,95 @@
   background: #f8f9fa;
   border-radius: 8px;
 
-  mat-progress-bar {
-    margin-bottom: 20px;
-    border-radius: 4px;
-  }
-}
-
-.progress-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  .step {
+  .progress-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 14px;
-    color: #9e9e9e;
-    transition: all 0.3s ease;
+    margin-bottom: 16px;
 
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+    .month-label {
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
     }
 
-    &.step-active {
-      color: #1976d2;
+    .retry-badge {
+      font-size: 12px;
+      color: #e65100;
+      background: #fff3e0;
+      padding: 2px 8px;
+      border-radius: 12px;
       font-weight: 500;
-
-      mat-icon {
-        color: #1976d2;
-        animation: pulse 1s infinite;
-      }
     }
+  }
 
-    &.step-done {
-      color: #2e7d32;
+  mat-progress-bar {
+    margin-bottom: 12px;
+    border-radius: 4px;
+  }
 
-      mat-icon {
-        color: #2e7d32;
-        animation: none;
-      }
-    }
+  .progress-text {
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
   }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+// Failed Section
+.failed-section {
+  margin-top: 24px;
+  padding: 20px;
+  background: #fff8f8;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+
+  > mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .failed-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .failed-title {
+      font-weight: 600;
+      font-size: 15px;
+      color: #c62828;
+    }
+
+    .failed-message {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .failed-progress {
+      font-size: 13px;
+      color: #888;
+      margin-top: 4px;
+    }
+  }
+
+  button {
+    flex-shrink: 0;
+    align-self: center;
+  }
 }
+
+// Status chip colors
+.status-queued {
+  background-color: #e3f2fd !important;
+  color: #1565c0 !important;
+}
+
 
 // Run Summary
 .run-summary {

@@ -11,6 +11,10 @@ export class PayrollService {
     return this.http.post<PayrollRun>(`/api/v1/payroll-cycle/${month}`, {});
   }
 
+  retryPayroll(month: string): Observable<PayrollRun> {
+    return this.http.post<PayrollRun>(`/api/v1/payroll-cycle/${month}/retry`, {});
+  }
+
   getPayrollRun(month: string): Observable<PayrollRun> {
     return this.http.get<PayrollRun>(`/api/v1/payroll-cycle/${month}`);
   }

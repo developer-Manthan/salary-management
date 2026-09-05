@@ -3,7 +3,12 @@ export interface PayrollRun {
   month: string;
   triggeredBy: 'MANUAL' | 'SCHEDULED';
   runAt: string;
-  status: 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  totalEmployees: number;
+  processedCount: number;
+  lastCompletedBatch: number;
+  retryCount: number;
+  errorMessage: string | null;
   paySlips?: PayrollRunLine[];
 }
 

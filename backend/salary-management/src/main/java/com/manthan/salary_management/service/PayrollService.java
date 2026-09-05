@@ -1,14 +1,12 @@
 package com.manthan.salary_management.service;
 
+import com.manthan.salary_management.dto.message.PayrollCycleMessage;
 import com.manthan.salary_management.dto.projection.PayrollSummaryProjection;
 import com.manthan.salary_management.dto.response.PaySlipResponse;
 import com.manthan.salary_management.dto.response.PayrollCycleResponse;
 import com.manthan.salary_management.dto.response.PayrollCycleSummaryResponse;
-import com.manthan.salary_management.entity.Employee;
 import com.manthan.salary_management.entity.PayrollCycle;
-import com.manthan.salary_management.entity.SalaryAdjustment;
 import com.manthan.salary_management.entity.PaySlip;
-import com.manthan.salary_management.entity.enums.AdjustmentType;
 import com.manthan.salary_management.entity.enums.EmploymentStatus;
 import com.manthan.salary_management.entity.enums.PayrollStatus;
 import com.manthan.salary_management.entity.enums.TriggerType;
@@ -18,8 +16,6 @@ import com.manthan.salary_management.mapper.PayrollMapper;
 import com.manthan.salary_management.repository.EmployeeRepository;
 import com.manthan.salary_management.repository.PaySlipRepository;
 import com.manthan.salary_management.repository.PayrollCycleRepository;
-import com.manthan.salary_management.repository.SalaryAdjustmentRepository;
-import com.manthan.salary_management.repository.SalaryHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,12 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -44,8 +36,7 @@ public class PayrollService {
     private final PayrollCycleRepository payrollCycleRepository;
     private final PaySlipRepository paySlipRepository;
     private final EmployeeRepository employeeRepository;
-    private final SalaryHistoryRepository salaryHistoryRepository;
-    private final SalaryAdjustmentRepository salaryAdjustmentRepository;
+    private final PayrollPublisher payrollPublisher;
 
     @Transactional
     public PayrollCycleResponse runPayroll(String month, TriggerType triggerType) {
@@ -53,70 +44,59 @@ public class PayrollService {
             throw new DuplicateResourceException("Payroll run already exists for month: " + month);
         }
 
-        log.info("Starting payroll run for month: {}", month);
-        long startTime = System.currentTimeMillis();
+        long activeCount = employeeRepository.countByStatus(EmploymentStatus.ACTIVE);
 
         PayrollCycle payrollCycle = PayrollCycle.builder()
                 .month(month)
                 .triggeredBy(triggerType)
                 .runAt(LocalDateTime.now())
-                .status(PayrollStatus.PROCESSING)
+                .status(PayrollStatus.QUEUED)
+                .totalEmployees((int) activeCount)
+                .processedCount(0)
+                .lastCompletedBatch(-1)
+                .retryCount(0)
                 .build();
         payrollCycle = payrollCycleRepository.save(payrollCycle);
 
-        List<Employee> activeEmployees = employeeRepository.findAll().stream()
-                .filter(e -> e.getStatus() == EmploymentStatus.ACTIVE)
-                .collect(Collectors.toList());
-        log.info("Found {} active employees", activeEmployees.size());
+        payrollPublisher.publish(PayrollCycleMessage.builder()
+                .payrollCycleId(payrollCycle.getId())
+                .month(month)
+                .triggerType(triggerType.name())
+                .startBatch(0)
+                .retryCount(0)
+                .build());
 
-        Map<Long, BigDecimal> salaryMap = new HashMap<>();
-        List<Object[]> allSalaries = salaryHistoryRepository.findAllCurrentSalaries();
-        for (Object[] row : allSalaries) {
-            Long employeeId = ((Number) row[0]).longValue();
-            BigDecimal amount = row[1] instanceof BigDecimal ? (BigDecimal) row[1] : new BigDecimal(row[1].toString());
-            salaryMap.put(employeeId, amount);
-        }
-        log.info("Loaded {} salary records in bulk", salaryMap.size());
+        log.info("Payroll run QUEUED for month {} — {} active employees", month, activeCount);
 
-        List<SalaryAdjustment> allAdjustments = salaryAdjustmentRepository.findByEffectiveMonth(month);
-        Map<Long, List<SalaryAdjustment>> adjustmentMap = allAdjustments.stream()
-                .collect(Collectors.groupingBy(adj -> adj.getEmployee().getId()));
-        log.info("Loaded {} adjustments for month {}", allAdjustments.size(), month);
+        return PayrollMapper.toPayrollCycleResponse(payrollCycle, null);
+    }
 
-        List<PaySlip> paySlips = new ArrayList<>();
-        for (Employee employee : activeEmployees) {
-            BigDecimal baseSalary = salaryMap.getOrDefault(employee.getId(), BigDecimal.ZERO);
+    @Transactional
+    public PayrollCycleResponse retryPayroll(String month) {
+        PayrollCycle cycle = payrollCycleRepository.findByMonth(month)
+                .orElseThrow(() -> new ResourceNotFoundException("PayrollCycle", "month", month));
 
-            List<SalaryAdjustment> empAdjustments = adjustmentMap.getOrDefault(employee.getId(), List.of());
-            BigDecimal totalAdjustments = BigDecimal.ZERO;
-            for (SalaryAdjustment adjustment : empAdjustments) {
-                if (adjustment.getType() == AdjustmentType.DEDUCTION) {
-                    totalAdjustments = totalAdjustments.subtract(adjustment.getAmount());
-                } else {
-                    totalAdjustments = totalAdjustments.add(adjustment.getAmount());
-                }
-            }
-
-            BigDecimal finalAmount = baseSalary.add(totalAdjustments);
-
-            paySlips.add(PaySlip.builder()
-                    .payrollCycle(payrollCycle)
-                    .employee(employee)
-                    .baseSalary(baseSalary)
-                    .totalAdjustments(totalAdjustments)
-                    .finalAmount(finalAmount)
-                    .build());
+        if (cycle.getStatus() != PayrollStatus.FAILED) {
+            throw new IllegalStateException("Can only retry FAILED payroll runs. Current status: " + cycle.getStatus());
         }
 
-        paySlipRepository.saveAll(paySlips);
+        int resumeBatch = cycle.getLastCompletedBatch() + 1;
 
-        payrollCycle.setStatus(PayrollStatus.COMPLETED);
-        payrollCycle = payrollCycleRepository.save(payrollCycle);
+        payrollPublisher.publish(PayrollCycleMessage.builder()
+                .payrollCycleId(cycle.getId())
+                .month(month)
+                .triggerType(cycle.getTriggeredBy().name())
+                .startBatch(resumeBatch)
+                .retryCount(cycle.getRetryCount() + 1)
+                .build());
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        log.info("Payroll run completed for month {} — {} employees processed in {}ms", month, paySlips.size(), elapsed);
+        cycle.setStatus(PayrollStatus.QUEUED);
+        cycle.setErrorMessage(null);
+        payrollCycleRepository.save(cycle);
 
-        return PayrollMapper.toPayrollCycleResponse(payrollCycle, paySlips);
+        log.info("Payroll retry QUEUED for month {} — resuming from batch {}", month, resumeBatch);
+
+        return PayrollMapper.toPayrollCycleResponse(cycle, null);
     }
 
     @Transactional(readOnly = true)
@@ -124,7 +104,9 @@ public class PayrollService {
         PayrollCycle payrollCycle = payrollCycleRepository.findByMonth(month)
                 .orElseThrow(() -> new ResourceNotFoundException("PayrollCycle", "month", month));
         
-        List<PaySlip> paySlips = paySlipRepository.findByPayrollCycleId(payrollCycle.getId());
+        List<PaySlip> paySlips = payrollCycle.getStatus() == PayrollStatus.COMPLETED
+                ? paySlipRepository.findByPayrollCycleId(payrollCycle.getId())
+                : null;
         
         return PayrollMapper.toPayrollCycleResponse(payrollCycle, paySlips);
     }
@@ -152,7 +134,7 @@ public class PayrollService {
     @Transactional(readOnly = true)
     public PayrollCycleSummaryResponse getPayrollCycleSummary(String month) {
         PayrollCycle payrollCycle = payrollCycleRepository.findByMonth(month)
-                .orElseThrow(() -> new ResourceNotFoundException("PayrollRun", "month", month));
+                .orElseThrow(() -> new ResourceNotFoundException("PayrollCycle", "month", month));
 
         PayrollSummaryProjection summary = paySlipRepository.getSummaryByPayrollCycleId(payrollCycle.getId());
 

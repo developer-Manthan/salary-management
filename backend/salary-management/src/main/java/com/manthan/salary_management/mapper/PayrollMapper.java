@@ -31,6 +31,11 @@ public class PayrollMapper {
                 .triggeredBy(entity.getTriggeredBy().name())
                 .runAt(entity.getRunAt())
                 .status(entity.getStatus().name())
+                .totalEmployees(entity.getTotalEmployees())
+                .processedCount(entity.getProcessedCount())
+                .lastCompletedBatch(entity.getLastCompletedBatch())
+                .retryCount(entity.getRetryCount())
+                .errorMessage(entity.getErrorMessage())
                 .paySlips(lineResponses)
                 .build();
     }

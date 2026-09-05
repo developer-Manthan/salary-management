@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/changes/006-alter-table-pay-slip.yaml
   - include:
       file: db/changelog/changes/007-update-foreign-key-constraints.yaml
+  - include:
+      file: db/changelog/changes/008-add-payroll-progress-columns.yaml

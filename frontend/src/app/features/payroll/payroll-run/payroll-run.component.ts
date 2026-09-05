@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -60,7 +60,7 @@ interface ExpandedRunState {
   templateUrl: './payroll-run.component.html',
   styleUrl: './payroll-run.component.scss'
 })
-export class PayrollRunComponent implements OnInit {
+export class PayrollRunComponent implements OnInit, OnDestroy {
   private payrollService = inject(PayrollService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
@@ -68,9 +68,10 @@ export class PayrollRunComponent implements OnInit {
   payrollRuns: PayrollRun[] = [];
   selectedMonth: string = this.getCurrentMonth();
   loading = true;
+
   runningPayroll = false;
-  currentStep = 0;
-  private stepInterval: any;
+  activeRun: PayrollRun | null = null;
+  private pollingInterval: any;
 
   // Track expanded state per run month
   expandedStates: Map<string, ExpandedRunState> = new Map();
@@ -80,6 +81,10 @@ export class PayrollRunComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPayrollRuns();
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
   }
 
   getCurrentMonth(): string {
@@ -94,6 +99,13 @@ export class PayrollRunComponent implements OnInit {
       next: (data) => {
         this.payrollRuns = data;
         this.loading = false;
+
+        const inProgress = data.find(r => r.status === 'QUEUED' || r.status === 'PROCESSING');
+        if (inProgress && !this.pollingInterval) {
+          this.activeRun = inProgress;
+          this.runningPayroll = true;
+          this.startPolling(inProgress.month);
+        }
       },
       error: (err) => {
         this.notificationService.error('Failed to load payroll runs');
@@ -122,25 +134,18 @@ export class PayrollRunComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.runningPayroll = true;
-        this.currentStep = 1;
-        this.startProgressSimulation();
-
         this.payrollService.runPayroll(this.selectedMonth).subscribe({
-          next: () => {
-            this.completeProgress();
-            setTimeout(() => {
-              this.notificationService.success(`Payroll processed successfully for ${formattedMonth}`);
-              this.loadPayrollRuns();
-              this.resetProgress();
-            }, 800);
+          next: (run) => {
+            this.runningPayroll = true;
+            this.activeRun = run;
+            this.startPolling(this.selectedMonth);
+            this.notificationService.success(`Payroll queued for ${formattedMonth}`);
           },
           error: (err: HttpErrorResponse) => {
-            this.resetProgress();
             if (err.status === 409) {
               this.notificationService.error(`Payroll for ${formattedMonth} has already been processed`);
             } else {
-              this.notificationService.error('Failed to process payroll');
+              this.notificationService.error('Failed to queue payroll');
             }
             console.error(err);
           }
@@ -149,25 +154,58 @@ export class PayrollRunComponent implements OnInit {
     });
   }
 
-  private startProgressSimulation(): void {
-    let stepIndex = 0;
-    this.stepInterval = setInterval(() => {
-      if (stepIndex < 4) {
-        this.currentStep = stepIndex + 2;
-        stepIndex++;
+  retryPayroll(month: string): void {
+    this.payrollService.retryPayroll(month).subscribe({
+      next: (run) => {
+        this.runningPayroll = true;
+        this.activeRun = run;
+        this.startPolling(month);
+        this.notificationService.success(`Payroll retry queued for ${this.formatMonth(month)}`);
+      },
+      error: (err) => {
+        this.notificationService.error('Failed to retry payroll');
+        console.error(err);
       }
-    }, 1000);
+    });
   }
 
-  private completeProgress(): void {
-    if (this.stepInterval) clearInterval(this.stepInterval);
-    this.currentStep = 6;
+  private startPolling(month: string): void {
+    this.stopPolling();
+
+    this.pollingInterval = setInterval(() => {
+      this.payrollService.getPayrollRun(month).subscribe({
+        next: (run) => {
+          this.activeRun = run;
+
+          if (run.status === 'COMPLETED') {
+            this.stopPolling();
+            this.runningPayroll = false;
+            this.notificationService.success(
+              `Payroll completed! ${run.processedCount} employees processed.`
+            );
+            this.loadPayrollRuns();
+          } else if (run.status === 'FAILED') {
+            this.stopPolling();
+            this.runningPayroll = false;
+            this.loadPayrollRuns();
+          }
+        },
+        error: () => {
+        }
+      });
+    }, 2000);
   }
 
-  private resetProgress(): void {
-    if (this.stepInterval) clearInterval(this.stepInterval);
-    this.runningPayroll = false;
-    this.currentStep = 0;
+  private stopPolling(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+  }
+
+  getProgressPercent(): number {
+    if (!this.activeRun || !this.activeRun.totalEmployees) return 0;
+    return Math.round((this.activeRun.processedCount / this.activeRun.totalEmployees) * 100);
   }
 
   // --- Paginated panel logic ---

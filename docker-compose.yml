@@ -37,6 +37,19 @@ services:
     volumes:
       - salary-management-redis-data:/data
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: salary-management-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - salary-management-rabbitmq-data:/var/lib/rabbitmq
+
 volumes:
   salary-management-mysql-data:
   salary-management-redis-data:
+  salary-management-rabbitmq-data:

@@ -18,5 +18,10 @@ public class PayrollCycleResponse {
     private String triggeredBy;
     private LocalDateTime runAt;
     private String status;
+    private Integer totalEmployees;
+    private Integer processedCount;
+    private Integer lastCompletedBatch;
+    private Integer retryCount;
+    private String errorMessage;
     private List<PaySlipResponse> paySlips;
 }

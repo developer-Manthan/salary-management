@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-add-payroll-progress-columns
+      author: manthan
+      changes:
+        - addColumn:
+            tableName: payroll_cycle
+            columns:
+              - column:
+                  name: total_employees
+                  type: INT
+                  defaultValue: 0
+              - column:
+                  name: processed_count
+                  type: INT
+                  defaultValue: 0
+              - column:
+                  name: last_completed_batch
+                  type: INT
+                  defaultValueNumeric: -1
+              - column:
+                  name: retry_count
+                  type: INT
+                  defaultValue: 0
+              - column:
+                  name: error_message
+                  type: VARCHAR(500)
