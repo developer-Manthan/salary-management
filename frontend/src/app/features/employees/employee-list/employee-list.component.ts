@@ -63,10 +63,14 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
   departmentFilter = '';
   countryFilter = '';
   statusFilter = '';
+  jobTitleFilter = '';
+  jobTitleSearchTerm = '';
 
   departments = ['Engineering', 'Product', 'Design', 'Marketing', 'Sales', 'HR', 'Finance', 'Operations', 'Legal', 'Support'];
   countries = ['US', 'UK', 'India', 'Germany', 'Canada', 'Australia', 'Japan', 'Singapore'];
   statuses = ['ACTIVE', 'INACTIVE'];
+  jobTitles: string[] = [];
+  filteredJobTitles: string[] = [];
 
   pageSize = 10;
   pageIndex = 0;
@@ -85,6 +89,11 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
       this.searchTerm = term;
       this.pageIndex = 0;
       this.loadEmployees();
+    });
+
+    this.employeeService.getJobTitles().subscribe(titles => {
+      this.jobTitles = titles;
+      this.filteredJobTitles = titles;
     });
 
     this.loadEmployees();
@@ -113,6 +122,7 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
     if (this.departmentFilter) params.department = this.departmentFilter;
     if (this.countryFilter) params.country = this.countryFilter;
     if (this.statusFilter) params.status = this.statusFilter;
+    if (this.jobTitleFilter) params.jobTitle = this.jobTitleFilter;
 
     this.employeeService.getEmployees(params).subscribe({
       next: (page) => {
@@ -151,8 +161,21 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
     this.departmentFilter = '';
     this.countryFilter = '';
     this.statusFilter = '';
+    this.jobTitleFilter = '';
+    this.jobTitleSearchTerm = '';
+    this.filteredJobTitles = this.jobTitles;
     this.pageIndex = 0;
     this.loadEmployees();
+  }
+
+  filterJobTitles(searchTerm: string): void {
+    this.jobTitleSearchTerm = searchTerm;
+    if (!searchTerm) {
+      this.filteredJobTitles = this.jobTitles;
+    } else {
+      const lower = searchTerm.toLowerCase();
+      this.filteredJobTitles = this.jobTitles.filter(t => t.toLowerCase().includes(lower));
+    }
   }
 
   onDeactivate(employee: Employee): void {

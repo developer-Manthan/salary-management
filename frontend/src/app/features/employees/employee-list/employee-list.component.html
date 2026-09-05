@@ -10,7 +10,7 @@
     <mat-card-content class="filter-container">
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Search employees</mat-label>
-        <input matInput placeholder="Search by name, code, or job title..."
+        <input matInput placeholder="Search by name or code..."
                (input)="onSearchInput($event)"
                [value]="searchTerm">
         <mat-icon matPrefix>search</mat-icon>
@@ -40,6 +40,20 @@
         <mat-select [(ngModel)]="statusFilter" (selectionChange)="onFilterChange()">
           <mat-option value="">All Statuses</mat-option>
           <mat-option *ngFor="let status of statuses" [value]="status">{{ status }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Job Title</mat-label>
+        <mat-select [(ngModel)]="jobTitleFilter" (selectionChange)="onFilterChange()" (openedChange)="$event ? null : filterJobTitles('')">
+          <div class="dropdown-search">
+            <input matInput placeholder="Search titles..."
+                   (input)="filterJobTitles($any($event.target).value)"
+                   (keydown)="$event.stopPropagation()"
+                   [value]="jobTitleSearchTerm">
+          </div>
+          <mat-option value="">All Job Titles</mat-option>
+          <mat-option *ngFor="let title of filteredJobTitles" [value]="title">{{ title }}</mat-option>
         </mat-select>
       </mat-form-field>
 

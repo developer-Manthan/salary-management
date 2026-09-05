@@ -9,7 +9,7 @@ export class EmployeeService {
   private http = inject(HttpClient);
   private baseUrl = '/api/v1/employees';
 
-  getEmployees(params?: { page?: number; size?: number; sort?: string; department?: string; country?: string; status?: string }): Observable<Page<Employee>> {
+  getEmployees(params?: { page?: number; size?: number; sort?: string; search?: string; department?: string; country?: string; status?: string; jobTitle?: string }): Observable<Page<Employee>> {
     let httpParams = new HttpParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -19,6 +19,10 @@ export class EmployeeService {
       });
     }
     return this.http.get<Page<Employee>>(this.baseUrl, { params: httpParams });
+  }
+
+  getJobTitles(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/job-titles`);
   }
 
   getEmployee(id: number): Observable<EmployeeDetail> {

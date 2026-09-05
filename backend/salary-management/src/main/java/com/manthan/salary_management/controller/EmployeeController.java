@@ -30,8 +30,14 @@ public class EmployeeController {
             @RequestParam(required = false) String department,
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String jobTitle,
             @PageableDefault(size = 20, sort = "name") Pageable pageable) {
-        return ResponseEntity.ok(employeeService.getAllEmployees(search, department, country, status, pageable));
+        return ResponseEntity.ok(employeeService.getAllEmployees(search, department, country, status, jobTitle, pageable));
+    }
+
+    @GetMapping("/job-titles")
+    public ResponseEntity<List<String>> getJobTitles() {
+        return ResponseEntity.ok(employeeService.getJobTitles());
     }
 
     @GetMapping("/{id}")
