@@ -11,3 +11,5 @@ databaseChangeLog:
       file: db/changelog/changes/005-create-salary-adjustment-table.yaml
   - include:
       file: db/changelog/changes/006-alter-table-pay-slip.yaml
+  - include:
+      file: db/changelog/changes/007-update-foreign-key-constraints.yaml

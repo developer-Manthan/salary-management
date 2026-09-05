@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-update-foreign-key-constraints
+      author: manthan
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: salary_history
+            constraintName: fk_salary_history_employee
+        - addForeignKeyConstraint:
+            baseTableName: salary_history
+            baseColumnNames: employee_id
+            constraintName: fk_salary_history_employee
+            referencedTableName: employee
+            referencedColumnNames: id
+            onUpdate: CASCADE
+            onDelete: CASCADE
+
+        - dropForeignKeyConstraint:
+            baseTableName: salary_adjustment
+            constraintName: fk_adjustment_employee
+        - addForeignKeyConstraint:
+            baseTableName: salary_adjustment
+            baseColumnNames: employee_id
+            constraintName: fk_adjustment_employee
+            referencedTableName: employee
+            referencedColumnNames: id
+            onUpdate: CASCADE
+            onDelete: CASCADE
+
+        - dropForeignKeyConstraint:
+            baseTableName: pay_slip
+            constraintName: fk_prl_payroll_cycle
+        - addForeignKeyConstraint:
+            baseTableName: pay_slip
+            baseColumnNames: payroll_cycle_id
+            constraintName: fk_prl_payroll_cycle
+            referencedTableName: payroll_cycle
+            referencedColumnNames: id
+            onUpdate: CASCADE
+            onDelete: CASCADE
+
+        - dropForeignKeyConstraint:
+            baseTableName: pay_slip
+            constraintName: fk_prl_employee
+        - addForeignKeyConstraint:
+            baseTableName: pay_slip
+            baseColumnNames: employee_id
+            constraintName: fk_prl_employee
+            referencedTableName: employee
+            referencedColumnNames: id
+            onUpdate: CASCADE
+            onDelete: CASCADE
