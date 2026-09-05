@@ -8,7 +8,7 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(135deg, var(--color-text) 0%, color-mix(in srgb, var(--color-text) 90%, #1a3a5e) 100%);
   
   .app-title {
     margin-left: 12px;
@@ -16,6 +16,7 @@
     font-weight: 600;
     font-size: 20px;
     letter-spacing: -0.5px;
+    color: #fff;
   }
   
   .spacer {
@@ -29,16 +30,20 @@
 
 .app-sidenav {
   width: 260px;
-  background: #0f0f23;
+  background: color-mix(in srgb, var(--color-text) 90%, black);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .main-content {
-  background: #f0f2f5;
+  background: color-mix(in srgb, var(--color-text) 6%, white);
 }
 
 .content-wrapper {
   padding: 24px;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+.mat-toolbar button.mat-mdc-icon-button {
+  fill: #fff;
 }

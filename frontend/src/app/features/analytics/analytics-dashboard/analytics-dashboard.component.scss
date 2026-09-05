@@ -29,7 +29,7 @@
       margin: 0;
       font-size: 20px;
       font-weight: 600;
-      color: #1a1a2e;
+      color: var(--color-text);
     }
   }
 
@@ -66,7 +66,7 @@
       justify-content: center;
       align-items: center;
       height: 350px;
-      color: #d32f2f;
+      color: var(--color-danger);
     }
   }
 }

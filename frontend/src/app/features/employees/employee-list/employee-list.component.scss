@@ -49,7 +49,7 @@
 
 .result-count {
   font-size: 14px;
-  color: #666;
+  color: color-mix(in srgb, var(--color-text) 50%, #999);
   font-weight: 500;
   white-space: nowrap;
   margin-bottom: 22px;
@@ -65,13 +65,13 @@
   input {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #ccc;
+    border: 1px solid color-mix(in srgb, var(--color-text) 15%, white);
     border-radius: 4px;
     font-size: 14px;
     outline: none;
 
     &:focus {
-      border-color: #1976d2;
+      border-color: var(--color-primary);
     }
   }
 }
@@ -87,7 +87,7 @@
 }
 
 .employee-name {
-  color: #1976d2;
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 500;
   
@@ -100,26 +100,26 @@
   transition: background-color 0.2s;
   
   &:hover {
-    background-color: #f8f9fa;
+    background-color: color-mix(in srgb, var(--color-text) 3%, white);
   }
 }
 
 .no-data-cell {
   padding: 48px;
   text-align: center;
-  color: #666;
+  color: color-mix(in srgb, var(--color-text) 50%, #999);
   font-style: italic;
 }
 
 .chip-active {
-  background-color: #e8f5e9 !important;
-  color: #2e7d32 !important;
+  background-color: color-mix(in srgb, var(--color-success) 12%, white) !important;
+  color: var(--color-success) !important;
   font-weight: 500;
 }
 
 .chip-inactive {
-  background-color: #ffebee !important;
-  color: #c62828 !important;
+  background-color: color-mix(in srgb, var(--color-danger) 8%, white) !important;
+  color: var(--color-danger) !important;
   font-weight: 500;
 }
 

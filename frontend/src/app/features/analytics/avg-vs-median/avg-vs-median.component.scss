@@ -3,15 +3,15 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+  background: linear-gradient(135deg, white 0%, color-mix(in srgb, var(--color-primary) 3%, white) 100%);
   position: relative;
 
   mat-card-header {
     margin-bottom: 24px;
     
     mat-icon {
-      background: #e3f2fd;
-      color: #1976d2;
+      background: color-mix(in srgb, var(--color-primary) 12%, white);
+      color: var(--color-primary);
       border-radius: 8px;
       padding: 8px;
       width: 40px;
@@ -24,7 +24,7 @@
     mat-card-title {
       font-size: 18px;
       font-weight: 600;
-      color: #1a1a2e;
+      color: var(--color-text);
     }
   }
 
@@ -48,7 +48,7 @@
 
       .label {
         font-size: 14px;
-        color: #666;
+        color: color-mix(in srgb, var(--color-text) 50%, #999);
         text-transform: uppercase;
         letter-spacing: 1px;
         margin-bottom: 8px;
@@ -62,17 +62,17 @@
     }
 
     .average-metric .value {
-      color: #1976d2; /* Blue */
+      color: var(--color-primary); /* Blue */
     }
 
     .median-metric .value {
-      color: #00796b; /* Teal */
+      color: var(--color-success); /* Teal */
     }
 
     .divider {
       width: 1px;
       height: 40px;
-      background-color: #e0e0e0;
+      background-color: color-mix(in srgb, var(--color-text) 12%, white);
     }
   }
 
@@ -86,13 +86,13 @@
       font-size: 16px;
       
       .diff-label {
-        color: #666;
+        color: color-mix(in srgb, var(--color-text) 50%, #999);
         margin-right: 8px;
       }
       
       .diff-value {
         font-weight: 600;
-        color: #333;
+        color: var(--color-text);
       }
     }
 
@@ -113,23 +113,23 @@
     }
 
     &.right .badge {
-      background-color: #fff3e0;
-      color: #e65100;
+      background-color: color-mix(in srgb, var(--color-warning) 10%, white);
+      color: var(--color-warning);
     }
 
     &.left .badge {
-      background-color: #e8f5e9;
-      color: #2e7d32;
+      background-color: color-mix(in srgb, var(--color-success) 12%, white);
+      color: var(--color-success);
     }
 
     &.symmetric .badge {
-      background-color: #f5f5f5;
-      color: #616161;
+      background-color: color-mix(in srgb, var(--color-text) 4%, white);
+      color: color-mix(in srgb, var(--color-text) 55%, #999);
     }
   }
 
   .error-state {
-    color: #d32f2f;
+    color: var(--color-danger);
     text-align: center;
     padding: 20px;
   }

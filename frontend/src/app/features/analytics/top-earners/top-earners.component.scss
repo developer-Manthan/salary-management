@@ -21,7 +21,7 @@
         margin: 0;
         font-size: 20px;
         font-weight: 600;
-        color: #1a1a2e;
+        color: var(--color-text);
       }
     }
 
@@ -46,14 +46,14 @@
       
       th.mat-header-cell {
         font-weight: 600;
-        color: #666;
+        color: color-mix(in srgb, var(--color-text) 50%, #999);
         font-size: 14px;
       }
       
       .element-row {
         transition: background-color 0.2s ease;
         &:hover {
-          background-color: #f8f9fa;
+          background-color: color-mix(in srgb, var(--color-text) 3%, white);
         }
       }
       
@@ -64,15 +64,15 @@
         width: 28px;
         height: 28px;
         border-radius: 50%;
-        background-color: #e3f2fd;
-        color: #1976d2;
+        background-color: color-mix(in srgb, var(--color-primary) 12%, white);
+        color: var(--color-primary);
         font-weight: 600;
         font-size: 13px;
       }
       
       .salary-cell {
         font-weight: 700;
-        color: #2e7d32;
+        color: var(--color-success);
       }
     }
 
@@ -81,11 +81,11 @@
       justify-content: center;
       align-items: center;
       padding: 40px;
-      color: #666;
+      color: color-mix(in srgb, var(--color-text) 50%, #999);
     }
     
     .error-state {
-      color: #d32f2f;
+      color: var(--color-danger);
     }
   }
 }

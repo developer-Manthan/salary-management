@@ -17,7 +17,7 @@
       margin: 0;
       font-size: 18px;
       font-weight: 600;
-      color: #1a1a2e;
+      color: var(--color-text);
     }
   }
 
@@ -35,13 +35,13 @@
     }
 
     .error-state, .empty-state {
-      color: #666;
+      color: color-mix(in srgb, var(--color-text) 50%, #999);
       text-align: center;
       padding: 20px;
     }
     
     .error-state {
-      color: #d32f2f;
+      color: var(--color-danger);
     }
   }
 }

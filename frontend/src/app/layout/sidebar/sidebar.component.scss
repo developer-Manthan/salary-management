@@ -13,7 +13,7 @@
   margin-bottom: 8px;
 
   .logo-icon {
-    color: #4fc3f7;
+    color: color-mix(in srgb, var(--color-primary) 50%, white);
     font-size: 28px;
     width: 28px;
     height: 28px;
@@ -47,9 +47,9 @@
 
 .active-link {
   background: rgba(79, 195, 247, 0.15) !important;
-  color: #4fc3f7 !important;
+  color: color-mix(in srgb, var(--color-primary) 50%, white) !important;
 
   mat-icon {
-    color: #4fc3f7 !important;
+    color: color-mix(in srgb, var(--color-primary) 50%, white) !important;
   }
 }

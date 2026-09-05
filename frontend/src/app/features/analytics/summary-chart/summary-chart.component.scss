@@ -13,7 +13,7 @@
     align-items: center;
     flex: 1;
     min-height: 300px;
-    color: #666;
+    color: color-mix(in srgb, var(--color-text) 50%, #999);
     font-size: 16px;
   }
 

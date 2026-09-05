@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-page-header',
   standalone: true,
   imports: [CommonModule],
+  host: { '[attr.title]': 'null' },
   template: `
     <div class="page-header">
       <h1>{{ title() }}</h1>
