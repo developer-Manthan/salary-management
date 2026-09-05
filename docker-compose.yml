@@ -29,5 +29,14 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  redis:
+    image: redis:7-alpine
+    container_name: salary-management-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - salary-management-redis-data:/data
+
 volumes:
   salary-management-mysql-data:
+  salary-management-redis-data:

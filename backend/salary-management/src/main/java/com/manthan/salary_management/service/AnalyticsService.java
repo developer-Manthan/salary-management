@@ -6,6 +6,8 @@ import com.manthan.salary_management.dto.response.BracketResponse;
 import com.manthan.salary_management.dto.response.TopEarnerResponse;
 import com.manthan.salary_management.repository.AnalyticsRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,6 +21,7 @@ public class AnalyticsService {
 
     private final AnalyticsRepository analyticsRepository;
 
+    @Cacheable(value = "analytics-summary", key = "#dimension + '-' + #metric")
     public AnalyticsSummaryResponse getSummary(String dimension, String metric) {
         String dimLower = dimension.toLowerCase();
         String metLower = metric.toLowerCase();
@@ -44,6 +47,7 @@ public class AnalyticsService {
                 .build();
     }
 
+    @Cacheable(value = "analytics-top-earners", key = "#n + '-' + #order")
     public List<TopEarnerResponse> getTopEarners(int n, String order) {
         if (n <= 0) n = 10;
         if (!"asc".equalsIgnoreCase(order) && !"desc".equalsIgnoreCase(order)) {
@@ -64,6 +68,7 @@ public class AnalyticsService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "analytics-brackets")
     public BracketResponse getBrackets() {
         List<Object[]> results = analyticsRepository.getBrackets();
         
@@ -91,6 +96,7 @@ public class AnalyticsService {
                 .build();
     }
 
+    @Cacheable(value = "analytics-avg-vs-median")
     public AvgVsMedianResponse getAvgVsMedian() {
         Object[] result = analyticsRepository.getAvgVsMedian();
         BigDecimal average = toBigDecimal(result[0]);

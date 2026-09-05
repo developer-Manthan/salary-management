@@ -35,6 +35,7 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final SalaryHistoryRepository salaryHistoryRepository;
+    private final CacheEvictionService cacheEvictionService;
 
     @Transactional(readOnly = true)
     public Page<EmployeeResponse> getAllEmployees(String search, String department, String country, String status, String jobTitle, Pageable pageable) {
@@ -115,6 +116,8 @@ public class EmployeeService {
                 .build();
         salaryHistoryRepository.save(initialSalary);
 
+        cacheEvictionService.evictAllAnalyticsCache();
+
         return EmployeeMapper.toResponse(employee, initialSalary.getAmount());
     }
 
@@ -154,6 +157,8 @@ public class EmployeeService {
         }
 
         employeeRepository.save(employee);
+
+        cacheEvictionService.evictAllAnalyticsCache();
                 
         return EmployeeMapper.toResponse(employee, currentSalaryAmount);
     }
@@ -167,6 +172,8 @@ public class EmployeeService {
         BigDecimal currentSalary = salaryHistoryRepository.findTopByEmployeeIdOrderByEffectiveDateDesc(employee.getId())
                 .map(SalaryHistory::getAmount)
                 .orElse(BigDecimal.ZERO);
+
+        cacheEvictionService.evictAllAnalyticsCache();
                                 
         return EmployeeMapper.toResponse(employee, currentSalary);
     }

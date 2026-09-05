@@ -5,10 +5,15 @@ import com.manthan.salary_management.dto.response.AvgVsMedianResponse;
 import com.manthan.salary_management.dto.response.BracketResponse;
 import com.manthan.salary_management.dto.response.TopEarnerResponse;
 import com.manthan.salary_management.service.AnalyticsService;
+import com.manthan.salary_management.service.CacheEvictionService;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/analytics")
@@ -16,6 +21,7 @@ import java.util.List;
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
+    private final CacheEvictionService cacheEvictionService;
 
     @GetMapping("/summary")
     public AnalyticsSummaryResponse getSummary(
@@ -39,5 +45,11 @@ public class AnalyticsController {
     @GetMapping("/avg-vs-median")
     public AvgVsMedianResponse getAvgVsMedian() {
         return analyticsService.getAvgVsMedian();
+    }
+
+    @DeleteMapping("/cache")
+    public ResponseEntity<Map<String, String>> clearCache() {
+        cacheEvictionService.evictAllAnalyticsCache();
+        return ResponseEntity.ok(Map.of("message", "Analytics cache cleared"));
     }
 }
