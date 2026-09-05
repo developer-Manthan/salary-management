@@ -4,6 +4,7 @@ import com.manthan.salary_management.dto.request.CreateAdjustmentRequest;
 import com.manthan.salary_management.dto.response.AdjustmentResponse;
 import com.manthan.salary_management.dto.response.PaySlipResponse;
 import com.manthan.salary_management.dto.response.PayrollCycleResponse;
+import com.manthan.salary_management.dto.response.PayrollCycleSummaryResponse;
 import com.manthan.salary_management.entity.enums.TriggerType;
 import com.manthan.salary_management.service.PayrollService;
 import com.manthan.salary_management.service.SalaryAdjustmentService;
@@ -55,6 +56,12 @@ public class PayrollController {
         Pageable pageable = PageRequest.of(page, size);
         Page<PaySlipResponse> paySlips = payrollService.getPaySlips(month, search, pageable);
         return ResponseEntity.ok(paySlips);
+    }
+
+    @GetMapping("/payroll-cycle/{month}/summary")
+    public ResponseEntity<PayrollCycleSummaryResponse> getPayrollRunSummary(@PathVariable String month) {
+        PayrollCycleSummaryResponse summary = payrollService.getPayrollCycleSummary(month);
+        return ResponseEntity.ok(summary);
     }
 
     @PostMapping("/employees/{employeeId}/adjustments")

@@ -94,18 +94,18 @@
           </div>
 
           <!-- Summary stats -->
-          <div class="run-summary" *ngIf="getState(run.month).paySlips.length > 0">
+          <div class="run-summary" *ngIf="getState(run.month).summary">
             <div class="summary-stat">
-              <span class="stat-label">Page Employees</span>
-              <span class="stat-value">{{ getState(run.month).paySlips.length }}</span>
+              <span class="stat-label">Total Employees</span>
+              <span class="stat-value">{{ getState(run.month).summary!.totalEmployees }}</span>
             </div>
             <div class="summary-stat">
-              <span class="stat-label">Page Payout</span>
-              <span class="stat-value">{{ getState(run.month).totalPayout | currency }}</span>
+              <span class="stat-label">Total Payout</span>
+              <span class="stat-value">{{ getState(run.month).summary!.totalPayout | currency }}</span>
             </div>
             <div class="summary-stat">
-              <span class="stat-label">Page Adjustments</span>
-              <span class="stat-value">{{ getState(run.month).totalAdjustments | currency }}</span>
+              <span class="stat-label">Total Adjustments</span>
+              <span class="stat-value">{{ getState(run.month).summary!.totalAdjustments | currency }}</span>
             </div>
           </div>
 

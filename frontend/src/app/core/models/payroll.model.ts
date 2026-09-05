@@ -42,3 +42,9 @@ export interface PagedResponse<T> {
   first: boolean;
   last: boolean;
 }
+
+export interface PayrollCycleSummary {
+  totalEmployees: number;
+  totalPayout: number;
+  totalAdjustments: number;
+}

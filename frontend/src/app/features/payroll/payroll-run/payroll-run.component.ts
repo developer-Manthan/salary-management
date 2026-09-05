@@ -20,7 +20,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { PayrollService } from '../../../core/services/payroll.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { PayrollRun, PayrollRunLine, PagedResponse } from '../../../core/models/payroll.model';
+import { PayrollRun, PayrollRunLine, PagedResponse, PayrollCycleSummary } from '../../../core/models/payroll.model';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -32,8 +32,8 @@ interface ExpandedRunState {
   pageSize: number;
   searchTerm: string;
   loading: boolean;
-  totalPayout: number;
-  totalAdjustments: number;
+  summary: PayrollCycleSummary | null;
+  summaryLoaded: boolean;
 }
 
 @Component({
@@ -181,8 +181,8 @@ export class PayrollRunComponent implements OnInit {
         pageSize: 20,
         searchTerm: '',
         loading: false,
-        totalPayout: 0,
-        totalAdjustments: 0
+        summary: null,
+        summaryLoaded: false
       });
     }
     return this.expandedStates.get(month)!;
@@ -190,6 +190,19 @@ export class PayrollRunComponent implements OnInit {
 
   onPanelOpened(month: string): void {
     const state = this.getState(month);
+
+    if (!state.summaryLoaded) {
+      this.payrollService.getPayrollCycleSummary(month).subscribe({
+        next: (summary) => {
+          state.summary = summary;
+          state.summaryLoaded = true;
+        },
+        error: () => {
+          this.notificationService.error('Failed to load payroll summary');
+        }
+      });
+    }
+
     if (state.paySlips.length === 0 && !state.loading) {
       this.loadLines(month);
     }
@@ -219,10 +232,6 @@ export class PayrollRunComponent implements OnInit {
         state.paySlips = page.content;
         state.totalElements = page.totalElements;
         state.loading = false;
-
-        // Compute summary from current page
-        state.totalPayout = page.content.reduce((sum, l) => sum + l.finalAmount, 0);
-        state.totalAdjustments = page.content.reduce((sum, l) => sum + l.totalAdjustments, 0);
       },
       error: () => {
         this.notificationService.error('Failed to load payroll details');

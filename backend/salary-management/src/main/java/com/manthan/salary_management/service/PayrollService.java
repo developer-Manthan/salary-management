@@ -1,7 +1,9 @@
 package com.manthan.salary_management.service;
 
+import com.manthan.salary_management.dto.projection.PayrollSummaryProjection;
 import com.manthan.salary_management.dto.response.PaySlipResponse;
 import com.manthan.salary_management.dto.response.PayrollCycleResponse;
+import com.manthan.salary_management.dto.response.PayrollCycleSummaryResponse;
 import com.manthan.salary_management.entity.Employee;
 import com.manthan.salary_management.entity.PayrollCycle;
 import com.manthan.salary_management.entity.SalaryAdjustment;
@@ -145,5 +147,19 @@ public class PayrollService {
                 payrollCycle.getId(), searchParam, pageable);
 
         return page.map(PayrollMapper::toPaySlipResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public PayrollCycleSummaryResponse getPayrollCycleSummary(String month) {
+        PayrollCycle payrollCycle = payrollCycleRepository.findByMonth(month)
+                .orElseThrow(() -> new ResourceNotFoundException("PayrollRun", "month", month));
+
+        PayrollSummaryProjection summary = paySlipRepository.getSummaryByPayrollCycleId(payrollCycle.getId());
+
+        return PayrollCycleSummaryResponse.builder()
+                .totalEmployees(summary.getTotalEmployees())
+                .totalPayout(summary.getTotalPayout())
+                .totalAdjustments(summary.getTotalAdjustments())
+                .build();
     }
 }

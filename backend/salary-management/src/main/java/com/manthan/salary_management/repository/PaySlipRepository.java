@@ -1,5 +1,6 @@
 package com.manthan.salary_management.repository;
 
+import com.manthan.salary_management.dto.projection.PayrollSummaryProjection;
 import com.manthan.salary_management.entity.PaySlip;
 
 import org.springframework.data.domain.Page;
@@ -23,4 +24,8 @@ public interface PaySlipRepository extends JpaRepository<PaySlip, Long> {
             @Param("payrollCycleId") Long payrollCycleId,
             @Param("search") String search,
             Pageable pageable);
+       
+    @Query("SELECT COUNT(ps) AS totalEmployees, COALESCE(SUM(ps.finalAmount), 0) AS totalPayout, COALESCE(SUM(ps.totalAdjustments), 0) AS totalAdjustments " +
+           "FROM PaySlip ps WHERE ps.payrollCycle.id = :payrollCycleId")
+    PayrollSummaryProjection getSummaryByPayrollCycleId(@Param("payrollCycleId") Long payrollCycleId);
 }
